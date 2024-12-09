@@ -1,8 +1,8 @@
 #root {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  /* padding: 2rem; */
+  /* text-align: center; */
 }
 body {
   margin: 0;
@@ -11,7 +11,9 @@ body {
   color: #9e9ea4;
   font-family: 'Montserrat', sans-serif;
 }
-
+label{
+  color: #1d2634;
+}
 .icon {
   vertical-align: middle;
   line-height: 1px;
@@ -74,7 +76,8 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 15px 30px 0px 30px;
-  margin-bottom: 30px;
+  margin-bottom: 10px;
+  color: #fff;
 }
 
 .sidebar-title > span {
@@ -235,4 +238,8 @@ body {
   .hedaer-left {
     display: none;
   }
+}
+
+.table-width{
+  width: 100%;
 }
