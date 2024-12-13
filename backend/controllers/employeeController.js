@@ -24,47 +24,75 @@ exports.getAllEmployee = async (req, res) => {
 }
 
 // create user registration 
+
+// User registration
 exports.registrationController = async (req, res) => {
-
     try {
-        const { username, email, password } = req.body
-        // validation 
+        const { employeeid, fullname, mobile, email, password, gender, role, status } = req.body;
 
-        if (!username || !email || !password) {
+        // Validation
+        if (!employeeid || !fullname || !mobile || !email || !password || !gender || !role || !status) {
             return res.status(400).send({
                 message: 'Please fill all fields',
-                success: 'false'
-            })
+                success: false
+            });
         }
 
-        // existing user
-        const existinguser = await employeeModel.findOne({ email })
-        if (existinguser) {
+        // Check if the email, mobile, or employeeid already exists
+        const existingEmail = await employeeModel.findOne({ email });
+        if (existingEmail) {
             return res.status(400).send({
-                message: 'User already exists',
-                success: 'false'
-            })
+                message: 'User with this email already exists',
+                success: false
+            });
         }
-        // encrypt password
-        const hashPassword = await bcrypt.hash(password, 10)
 
-        // save data
-        const user = new employeeModel({ username, email, password: hashPassword })
-        await user.save();
+        const existingMobile = await employeeModel.findOne({ mobile });
+        if (existingMobile) {
+            return res.status(400).send({
+                message: 'User with this mobile number already exists',
+                success: false
+            });
+        }
+
+        const existingEmployeeId = await employeeModel.findOne({ employeeid });
+        if (existingEmployeeId) {
+            return res.status(400).send({
+                message: 'User with this employee ID already exists',
+                success: false
+            });
+        }
+
+        // Encrypt password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Save new employee data
+        const newUser = new employeeModel({
+            employeeid,
+            fullname,
+            mobile,
+            email,
+            password: hashedPassword,
+            gender,
+            role,
+            status
+        });
+
+        await newUser.save();
         return res.status(201).send({
             message: "User created successfully",
             success: true,
-            user: user
-        })
-    } catch (error) {
+            user: newUser
+        });
 
+    } catch (error) {
         return res.status(400).send({
-            message: 'Error in register callback',
-            success: 'false',
+            message: 'Error in registration callback',
+            success: false,
             error: error
-        })
+        });
     }
-}
+};
 
 //user login
 exports.loginController = async (req, res) => {
