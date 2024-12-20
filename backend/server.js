@@ -1,4 +1,5 @@
 const express = require('express');
+const cookieParser = require('cookie-parser'); // Ensure cookie-parser is required
 const dotenv = require("dotenv");
 const app = express()
 const connectToMongo = require('./db');
@@ -10,11 +11,13 @@ dotenv.config();
 app.use(cors())
 
 app.use(express.json());
+app.use(cookieParser()); 
 // Available routes
 const userRoute = require('./routes/userRoutes');
+const taskRoute = require('./routes/taskRoutes');
 
 app.use('/api/auth', userRoute);
-// app.use('/api/notes', require('./routes/notes'));
+app.use('/api/task', taskRoute);
 
 app.listen(port, () => {
     connectToMongo();

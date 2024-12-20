@@ -1,17 +1,21 @@
 const express = require('express');
-const { getAllEmployee, registrationController, loginController } = require('../controllers/employeeController');
+const { getAllEmployee, registrationController, loginController,logoutController, myProfile, deleteEmployee } = require('../controllers/employeeController');
+const { adminAuthMiddleware } = require('../middlewares/adminAuthMiddleware');
 
 // router object 
 const router = express.Router();
 
-// Get all user
-router.get('/employee', getAllEmployee)
+// Get all employee
+router.get('/employee',adminAuthMiddleware, getAllEmployee)
+// Get one employee
+router.get('/myprofile',adminAuthMiddleware, myProfile)
 
-
-// register user
+// register employee
 router.post('/register', registrationController)
 
-// Login user
-router.post('/login', loginController)
+// Login employee
+router.post('/login',loginController)
+router.get('/logout',adminAuthMiddleware, logoutController)
+router.get('/delete/:id',adminAuthMiddleware, deleteEmployee)
 
 module.exports = router;

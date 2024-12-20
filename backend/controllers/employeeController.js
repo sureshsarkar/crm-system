@@ -1,13 +1,14 @@
 
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const employeeModel = require('../models/EmployeeModel');
-const generateTokenAndSetCookie = "../utils/generateToken";
-// get all user
+const { generateTokenAndSetCookie, getIdFromToken } = require('../utils/generateToken');
+// get all employee
 exports.getAllEmployee = async (req, res) => {
 
     try {
 
-        const employee = await employeeModel.find();
+        const employee = await employeeModel.find().select('-password');
 
         res.status(201).send({
             message: "Fetch all employee",
@@ -26,9 +27,9 @@ exports.getAllEmployee = async (req, res) => {
     }
 }
 
-// create user registration  dsfsdifdsfsdf
+// create employee registration  dsfsdifdsfsdf
 
-// User registration
+// employee registration
 exports.registrationController = async (req, res) => {
     try {
         const { employeeid, fullname, mobile, email, password, gender, role, status } = req.body;
@@ -45,7 +46,7 @@ exports.registrationController = async (req, res) => {
         const existingEmail = await employeeModel.findOne({ email });
         if (existingEmail) {
             return res.status(400).send({
-                message: 'User with this email already exists',
+                message: 'Employee with this email already exists',
                 success: false
             });
         }
@@ -53,7 +54,7 @@ exports.registrationController = async (req, res) => {
         const existingMobile = await employeeModel.findOne({ mobile });
         if (existingMobile) {
             return res.status(400).send({
-                message: 'User with this mobile number already exists',
+                message: 'Employee with this mobile number already exists',
                 success: false
             });
         }
@@ -61,7 +62,7 @@ exports.registrationController = async (req, res) => {
         const existingEmployeeId = await employeeModel.findOne({ employeeid });
         if (existingEmployeeId) {
             return res.status(400).send({
-                message: 'User with this employee ID already exists',
+                message: 'Employee with this employee ID already exists',
                 success: false
             });
         }
@@ -70,7 +71,7 @@ exports.registrationController = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Save new employee data
-        const newUser = new employeeModel({
+        const newEmployee = new employeeModel({
             employeeid,
             fullname,
             mobile,
@@ -81,12 +82,18 @@ exports.registrationController = async (req, res) => {
             status
         });
 
-        await newUser.save();
-        return res.status(201).send({
-            message: "User created successfully",
-            success: true,
-            user: newUser
-        });
+        await newEmployee.save();
+      
+        // Generate token and set cookie
+       const token =  generateTokenAndSetCookie(newEmployee._id,newEmployee.role, res);
+
+       // Send response with user data
+       return res.status(201).send({
+           message: "User created successfully",
+           success: true,
+           token: token,
+           role:user.role
+       });
 
     } catch (error) {
         return res.status(400).send({
@@ -131,14 +138,72 @@ exports.loginController = async (req, res) => {
         }
 
         // Generate token and set cookie
-        generateTokenAndSetCookie(user._id, res);
+       const token =  generateTokenAndSetCookie(user._id,user.role, res);
 
         // Send response with user data
         return res.status(200).send({
             message: 'User found and logged in successfully',
             success: true,
-            user: user
+            token: token,
+            role:user.role
         });
+
+    } catch (error) {
+        return res.status(500).send({
+            message: 'Server Error',
+            success: false,
+            error: error.message || error
+        });
+    }
+}
+
+// user logout
+exports.logoutController = (req, res) => {
+    // Clear the 'jwt' cookie
+    res.clearCookie('jwt', {
+        httpOnly: true,  // Prevents JavaScript from accessing the cookie (helps mitigate XSS)
+        sameSite: 'Strict',  // Protects against CSRF attacks
+    });
+
+    // Send response to the client indicating successful logout
+    return res.status(200).send({
+        message: 'Logged out successfully.',
+        success: true,
+    });
+};
+
+
+exports.myProfile = async(req,res)=>{
+    try {
+
+        const getId = getIdFromToken(req, res);
+
+     // Optionally, fetch user profile from DB using userId (if needed)
+        const employee = await employeeModel.findById(getId.userId).select('-password'); 
+        return res.status(201).send({
+            message:"Employee got",
+            success:true,
+            employee: employee
+        })
+    } catch (error) {
+        return res.status(500).send({
+            message: 'Server Error',
+            success: false,
+            error: error.message || error
+        });
+    }
+}
+
+// delete employee 
+exports.deleteEmployee = async(req,res)=>{
+    try {
+
+        const id = req.params.id;
+        const employee = await employeeModel.findByIdAndDelete(id);
+        return res.status(200).send({
+            message: "Employee deleted",
+            success: true
+        })
 
     } catch (error) {
         return res.status(500).send({
