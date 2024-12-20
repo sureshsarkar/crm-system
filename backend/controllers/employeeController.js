@@ -104,6 +104,50 @@ exports.registrationController = async (req, res) => {
     }
 };
 
+
+// edit employee
+exports.editEmployeeController = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const {fullname, gender, role, status } = req.body;
+
+        // Validation
+        if (!fullname || !gender || !role || !status) {
+            return res.status(400).send({
+                message: 'Please fill all fields',
+                success: false
+            });
+        }
+
+        // Save new employee data
+        const newEmployee = {
+            fullname,
+            gender,
+            role,
+            status
+        };
+
+
+         await employeeModel.findByIdAndUpdate(id,newEmployee);
+        const employee = await employeeModel.findById(id);
+
+       // Send response with user data
+       return res.status(201).send({
+           message: "Employee Updated successfully",
+           success: true,
+           employee:employee
+       });
+
+    } catch (error) {
+        return res.status(400).send({
+            message: 'Error in registration callback',
+            success: false,
+            error: error
+        });
+    }
+};
+
+
 // user login
 exports.loginController = async (req, res) => {
     try {
@@ -172,19 +216,44 @@ exports.logoutController = (req, res) => {
     });
 };
 
-
-exports.myProfile = async(req,res)=>{
+// get profile data 
+exports.myProfile = async (req, res) => {
     try {
+        let employee;
 
-        const getId = getIdFromToken(req, res);
+        const id = req.params.id;
 
-     // Optionally, fetch user profile from DB using userId (if needed)
-        const employee = await employeeModel.findById(getId.userId).select('-password'); 
-        return res.status(201).send({
-            message:"Employee got",
-            success:true,
+        // If 'id' is not provided, get userId from token
+        if (!id) {
+            const getId = getIdFromToken(req, res); // This function should return an object with a 'userId' key
+            if (!getId || !getId.userId) {
+                return res.status(400).send({
+                    message: 'Token is invalid or userId is missing from token',
+                    success: false
+                });
+            }
+
+            // Fetch the employee using the userId from the token
+            employee = await employeeModel.findById(getId.userId).select('-password');
+        } else {
+            // If 'id' is provided, fetch the employee by the provided ID
+            employee = await employeeModel.findById(id).select('-password');
+        }
+
+        if (!employee) {
+            return res.status(404).send({
+                message: 'Employee not found',
+                success: false
+            });
+        }
+
+        // Return the employee profile in the response
+        return res.status(200).send({
+            message: 'Employee profile retrieved successfully',
+            success: true,
             employee: employee
-        })
+        });
+        
     } catch (error) {
         return res.status(500).send({
             message: 'Server Error',
@@ -192,7 +261,7 @@ exports.myProfile = async(req,res)=>{
             error: error.message || error
         });
     }
-}
+};
 
 // delete employee 
 exports.deleteEmployee = async(req,res)=>{

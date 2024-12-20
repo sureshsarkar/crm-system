@@ -89,6 +89,45 @@
 						"url": "http://localhost:5000/api/auth/register"
 					},
 					"response": []
+				},
+				{
+					"name": "editEmployee",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:5000/api/auth/edit-employee/675c16ed431cca84d7976904"
+					},
+					"response": []
+				},
+				{
+					"name": "editEmployee",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"fullname\":\"Suresh Sarkar\",\r\n    \"email\":\"suresh@gmail.com\",\r\n    \"mobile\":8978765678,\r\n    \"password\":123456,\r\n    \"gender\":\"Male\",\r\n    \"role\":1,\r\n    \"employeeid\":\"EMP01\",\r\n    \"status\":1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:5000/api/auth/edit-employee/675c16ed431cca84d7976904"
+					},
+					"response": []
 				}
 			]
 		}
