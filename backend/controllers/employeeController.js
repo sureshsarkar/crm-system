@@ -86,13 +86,15 @@ exports.registrationController = async (req, res) => {
       
         // Generate token and set cookie
        const token =  generateTokenAndSetCookie(newEmployee._id,newEmployee.role, res);
-
+    //    return res.status(201).send({
+    //     token:token
+    //    });
        // Send response with user data
        return res.status(201).send({
            message: "User created successfully",
            success: true,
            token: token,
-           role:user.role
+           role:newEmployee.role
        });
 
     } catch (error) {
@@ -109,8 +111,19 @@ exports.registrationController = async (req, res) => {
 exports.editEmployeeController = async (req, res) => {
     try {
         const id = req.params.id;
-        const {fullname, gender, role, status } = req.body;
+        const {fullname,mobile,email, gender, role,employeeid, status } = req.body;
 
+        if(!fullname || !email || !mobile || role){
+           const employeeData = await employeeModel.findById(id).select('-password');
+
+              // Send response with user data
+            return res.status(201).send({
+                message: "Employee found",
+                success: true,
+                employee:employeeData
+            });
+
+        }
         // Validation
         if (!fullname || !gender || !role || !status) {
             return res.status(400).send({
@@ -118,6 +131,33 @@ exports.editEmployeeController = async (req, res) => {
                 success: false
             });
         }
+
+
+          // Check if the email, mobile, or employeeid already exists
+          const existingEmail = await employeeModel.findOne({ email, _id: { $ne: id } });
+          if (existingEmail) {
+              return res.status(400).send({
+                  message: 'Employee with this email already exists',
+                  success: false
+              });
+          }
+  
+          const existingMobile = await employeeModel.findOne({ mobile, _id: { $ne: id } });
+          if (existingMobile) {
+              return res.status(400).send({
+                  message: 'Employee with this mobile number already exists',
+                  success: false
+              });
+          }
+  
+          const existingEmployeeId = await employeeModel.findOne({ employeeid, _id: { $ne: id } });
+          if (existingEmployeeId) {
+              return res.status(400).send({
+                  message: 'Employee with this employee ID already exists',
+                  success: false
+              });
+          }
+
 
         // Save new employee data
         const newEmployee = {

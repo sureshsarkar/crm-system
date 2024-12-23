@@ -25,8 +25,8 @@ router.post('/register', registrationController);
 // Login employee
 router.post('/login',loginController);
 router.get('/logout',adminAuthMiddleware, logoutController);
-router.get('/edit-employee/:id', myProfile);
-router.post('/edit-employee/:id', editEmployeeController);
-router.get('/delete/:id',adminAuthMiddleware, deleteEmployee);
+router.delete('/delete-employee/:id',adminAuthMiddleware, deleteEmployee);
+// router.put('/edit-employee/:id', myProfile);
+router.put('/edit-employee/:id', editEmployeeController);
 
 module.exports = router;
