@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { IoIosArrowRoundBack } from "react-icons/io";
 import axios from 'axios'
 
@@ -12,6 +12,7 @@ const AddEmployee = () => {
     role: "",
     gender: "",
     status: "",
+    projects:""
   });
 
   const handleChange = (e) => {
@@ -35,14 +36,14 @@ const AddEmployee = () => {
         role: inputs.role,
         gender: inputs.gender,
         status: inputs.status,
+        projects: inputs.projects,
       }
-console.log(formData);
+
+console.log(data);
 return false;
 
     try {
-      const { data } = await axios.post("/api/v1/user/register",formData
-       
-      )
+      const { data } = await axios.post("/api/v1/user/register",formData)
       if (data.success) {
         alert("User registered Successfully");
         navigate('/login')
@@ -51,6 +52,24 @@ return false;
       console.log(error);
     }
   }
+
+  // function to get projects  
+
+  const getProjects = async (e)=>{
+    try {
+      const projectRes = await axios.get("/api/project/get-all")
+      console.log("Projects:", projectRes);
+      return false;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  // useEffect
+  useEffect(() => {
+    getProjects();
+}, [])
+
   return (
     <div className="main-container">
       <div className="d-flex justify-content-between">
@@ -79,6 +98,21 @@ return false;
                 />
               </div>
             </div>
+
+            <div className="col-md-6">
+              <div className="mb-3">
+                <label htmlFor="exampleInputPassword1" className="form-label">
+                  Projects <span className="text-success"><b>*</b></span>
+                </label>
+                <select className="form-select" name="projects" required onChange={handleChange}>
+                  <option value="1">Employee</option>
+                  <option value="2">Project Manager</option>
+                  <option value="3">SEO Manager</option>
+                  <option value="4">Development Manager</option>
+                </select>
+              </div>
+            </div>
+
             <div className="col-md-6">
               <div className="mb-3">
                 <label htmlFor="fullname" className="form-label">

@@ -43,8 +43,6 @@ function App() {
           <Route path="/task" element={<ManageTask />} />
           <Route path="/task/add" element={<AddTask />} />
           <Route path="/task/edit/:id" element={<EditTask />} />
-
-
         </Routes>
       </div>
     </Router>

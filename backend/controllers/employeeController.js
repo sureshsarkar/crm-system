@@ -32,7 +32,7 @@ exports.getAllEmployee = async (req, res) => {
 // employee registration
 exports.registrationController = async (req, res) => {
     try {
-        const { employeeid, fullname, mobile, email, password, gender, role, status } = req.body;
+        const { employeeid, fullname, mobile, email, password, gender, role, status,projects } = req.body;
 
         // Validation
         if (!employeeid || !fullname || !mobile || !email || !password || !gender || !role || !status) {
@@ -79,7 +79,8 @@ exports.registrationController = async (req, res) => {
             password: hashedPassword,
             gender,
             role,
-            status
+            status,
+            projects
         });
 
         await newEmployee.save();
@@ -111,9 +112,9 @@ exports.registrationController = async (req, res) => {
 exports.editEmployeeController = async (req, res) => {
     try {
         const id = req.params.id;
-        const {fullname,mobile,email, gender, role,employeeid, status } = req.body;
+        const {fullname,mobile,email, gender, role,employeeid, status,projects } = req.body;
 
-        if(!fullname || !email || !mobile || role){
+        if(!fullname || !email || !mobile || !role){
            const employeeData = await employeeModel.findById(id).select('-password');
 
               // Send response with user data
@@ -164,12 +165,13 @@ exports.editEmployeeController = async (req, res) => {
             fullname,
             gender,
             role,
-            status
+            status,
+            projects
         };
 
 
          await employeeModel.findByIdAndUpdate(id,newEmployee);
-        const employee = await employeeModel.findById(id);
+        const employee = await employeeModel.findById(id).select('-password');
 
        // Send response with user data
        return res.status(201).send({

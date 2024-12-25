@@ -1,10 +1,11 @@
 {
   "name": "lms",
+  "proxy": "http://localhost:5000",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "frontend": "vite",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
