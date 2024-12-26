@@ -1,8 +1,10 @@
 import React, { useState,useEffect } from "react";
 import { IoIosArrowRoundBack } from "react-icons/io";
 import axios from 'axios'
+import Select from 'react-select';
 
 const AddEmployee = () => {
+  const [projectState, setProjectState] = useState([]);
   const [inputs, setInputs] = useState({
     fullname: "",
     email: "",
@@ -36,14 +38,14 @@ const AddEmployee = () => {
         role: inputs.role,
         gender: inputs.gender,
         status: inputs.status,
-        projects: inputs.projects,
+        projects: selectedProjects.map(selectedVal=>selectedVal.value),
       }
 
-console.log(data);
-return false;
+// console.log(formData);
+// return false;
 
     try {
-      const { data } = await axios.post("/api/v1/user/register",formData)
+      const { data } = await axios.post("/api/auth/register",formData)
       if (data.success) {
         alert("User registered Successfully");
         navigate('/login')
@@ -53,22 +55,42 @@ return false;
     }
   }
 
+
   // function to get projects  
 
   const getProjects = async (e)=>{
     try {
-      const projectRes = await axios.get("/api/project/get-all")
-      console.log("Projects:", projectRes);
-      return false;
+      const {data} = await axios.get("/api/project/get-all")
+      if(data?.success){
+        setProjectState(data?.project);
+        // console.log(projectState);
+      }
+     
     } catch (error) {
       console.log(error);
     }
   }
 
-  // useEffect
-  useEffect(() => {
+ 
+   // useEffect
+   useEffect(() => {
     getProjects();
-}, [])
+}, []);
+
+
+const [selectedProjects, setSelectedProjects] = useState(null);
+
+// Handle change event for the select element
+const handleChangeProject = (selected) => {
+  setSelectedProjects(selected)
+};
+
+
+const options = projectState.map((project) => ({
+  value: project._id, 
+  label: project.projectname 
+}));
+
 
   return (
     <div className="main-container">
@@ -93,7 +115,7 @@ return false;
                   className="form-control"
                   name="employeeid"
                   onChange={handleChange}
-                  value="EMP"
+                  value={inputs.employeeid}
                   required
                 />
               </div>
@@ -104,12 +126,25 @@ return false;
                 <label htmlFor="exampleInputPassword1" className="form-label">
                   Projects <span className="text-success"><b>*</b></span>
                 </label>
-                <select className="form-select" name="projects" required onChange={handleChange}>
-                  <option value="1">Employee</option>
-                  <option value="2">Project Manager</option>
-                  <option value="3">SEO Manager</option>
-                  <option value="4">Development Manager</option>
-                </select>
+
+                <Select
+      isMulti = {true}
+      name="projects"
+      options={options}
+      value={selectedProjects}
+      onChange={handleChangeProject}
+      className="basic-multi-select"
+      classNamePrefix="select"
+      placeholder="Select Projects"
+    />
+    
+    
+                {/* <select className="form-select" name="projects" multiple required onChange={handleChangeProject}>
+                {projectState.map((project) => (
+                  <option key={project._id} value={project._id}>{project.projectname}</option>
+
+                ))}
+                </select> */}
               </div>
             </div>
 
