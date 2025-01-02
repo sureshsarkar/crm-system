@@ -18,6 +18,11 @@ import EditEmployee from "./admin/components/employee/EditEmployee";
 import ManageTask from "./admin/components/task/ManageTask";
 import AddTask from "./admin/components/task/AddTask";
 import EditTask from "./admin/components/task/EditTask";
+import ManageProject from "./admin/components/project/ManageProjects";
+import AddProject from "./admin/components/project/AddProject";
+import EditProject from "./admin/components/project/EditProject";
+import Login from "./admin/Login";
+import ProtectedRoute from "./utills/ProtectedRoute";
 
 function App() {
   const [openSidebarToggle, setOpenSidebarToggle] = useState(false);
@@ -35,14 +40,20 @@ function App() {
           OpenSidebar={OpenSidebar}
         />
         <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/employee" element={<ManageEmployee />} />
-          <Route path="/employee/add" element={<AddEmployee />} />
-          <Route path="/employee/edit/:id" element={<EditEmployee />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
 
-          <Route path="/task" element={<ManageTask />} />
-          <Route path="/task/add" element={<AddTask />} />
-          <Route path="/task/edit/:id" element={<EditTask />} />
+          <Route path="/project" element={<ProtectedRoute><ManageProject /></ProtectedRoute>} />
+          <Route path="/project/add" element={<ProtectedRoute><AddProject /></ProtectedRoute>} />
+          <Route path="/project/edit/:id" element={<ProtectedRoute><EditProject /></ProtectedRoute>} />
+
+          <Route path="/employee" element={<ProtectedRoute><ManageEmployee /></ProtectedRoute>} />
+          <Route path="/employee/add" element={<ProtectedRoute><AddEmployee /></ProtectedRoute>} />
+          <Route path="/employee/edit/:id" element={<ProtectedRoute><EditEmployee /></ProtectedRoute>} />
+
+          <Route path="/task" element={<ProtectedRoute><ManageTask /></ProtectedRoute>} />
+          <Route path="/task/add" element={<ProtectedRoute><AddTask /></ProtectedRoute>} />
+          <Route path="/task/edit/:id" element={<ProtectedRoute><EditTask /></ProtectedRoute>} />
         </Routes>
       </div>
     </Router>

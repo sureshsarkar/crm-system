@@ -1,16 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { IoIosArrowRoundBack } from "react-icons/io";
-import axios from 'axios'
+import axios from 'axios';
+import Select from "react-select";
+import toast from "react-hot-toast";
+import dayjs from 'dayjs';
+import { useNavigate, useParams } from "react-router-dom";
 
 const EditTask = () => {
+  const [employeeState, setEmployeeState] = useState([]);
+  const [projectState, setProjectState] = useState([]);
+  const [selectedEmployee, setSelectedEmployee] = useState([]);
+  const [selectedFollowerEmployee, setSelectedFollowerEmployee] = useState([]);
+  const [selectedProjects, setSelectedProjects] = useState([]);
+  
+ 
+   const { id } = useParams();
+   const navigate = useNavigate();
+
   const [inputs, setInputs] = useState({
-    fullname: "",
-    email: "",
-    password: "",
-    mobile: "",
-    employeeid: "",
-    role: "",
-    gender: "",
+    title: "",
+    startdate: "",
+    enddate: "",
+    follower: "",
+    assignto: "",
+    projectname: "",
+    tag: "",
+    description: "",
     status: "",
   });
 
@@ -21,40 +36,130 @@ const EditTask = () => {
     });
   };
 
-
-
-  // submit function 
+  // Submit function 
   const handleSubmit = async (e) => {
     e.preventDefault();
-      const formData =  {
-        fullname: inputs.fullname,
-        email: inputs.email,
-        password: inputs.password,
-        mobile: inputs.mobile,
-        employeeid: inputs.employeeid,
-        role: inputs.role,
-        gender: inputs.gender,
-        status: inputs.status,
-      }
-console.log(formData);
-return false;
+ 
+
+    const formData = {
+      title: inputs.title,
+      startdate: inputs.startdate,
+      enddate: inputs.enddate,
+      follower: selectedFollowerEmployee?.value || "",
+      assignto: selectedEmployee?.value || "",
+      projectname: selectedProjects?.value || "",
+      tag: inputs.tag,
+      description: inputs.description,
+      status: inputs.status,
+    };
+// console.log(selectedFollowerEmployee);
+// return false
+
+  
 
     try {
-      const { data } = await axios.post("/api/v1/user/register",formData
-       
-      )
+      const { data } = await axios.put(`/api/task/edit-task/${id}`, formData);
+     
       if (data.success) {
-        alert("User registered Successfully");
-        navigate('/login')
+        toast.success(data.message);
+        navigate('/task');
       }
     } catch (error) {
-      console.log(error);
+      toast.error("Failed to edit task");
     }
-  }
+  };
+
+  // Fetch employees
+  const getEmployee = async () => {
+    try {
+      const { data } = await axios.get("/api/auth/employee");
+      if (data?.success) {
+        setEmployeeState(data?.employee);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  // Fetch projects
+  const getProjects = async () => {
+    try {
+      const { data } = await axios.get("/api/project/get-all");
+      if (data?.success) {
+        setProjectState(data?.project);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  
+  useEffect(() => {
+    getEmployee();
+    getProjects();
+  }, []);
+  
+  useEffect(() => {
+    const fetchTaskDetails = async () => {
+      try {
+        const { data } = await axios.put(`/api/task/edit-task/${id}`);
+        
+        if (data.taskData) {
+          setInputs({
+            title: data.taskData.title,
+            startdate: dayjs(data.taskData.startdate).format('YYYY-MM-DD'),
+            enddate: dayjs(data.taskData.enddate).format('YYYY-MM-DD'),
+            tag: data.taskData.tag,
+            description: data.taskData.description,
+            status: data.taskData.status
+          });
+          
+          setSelectedEmployee(employeeState.filter((p) => data.taskData.assignto.includes(p._id)).map((p) => ({ value: p._id, label: p.fullname }))[0]);
+          setSelectedFollowerEmployee(employeeState.filter((p) => data.taskData.follower.includes(p._id)).map((p) => ({ value: p._id, label: p.fullname }))[0]);
+          setSelectedProjects(projectState.filter((p) => data.taskData.projectname.includes(p._id)).map((p) => ({ value: p._id, label: p.projectname }))[0]);
+        }
+      } catch (error) {
+        toast.error("Failed to fetch task details");
+      }
+    };
+  
+    fetchTaskDetails();
+
+// console.log(selectedFollowerEmployee);
+
+  }, []);
+
+
+
+  // Employee options for select
+  const options = employeeState.map((employee) => ({
+    value: employee._id,
+    label: employee.fullname,
+  }));
+
+  // Project options for select
+  const projectOptions = projectState.map((project) => ({
+    value: project._id,
+    label: project.projectname,
+  }));
+
+  // Handle select changes
+  const handleChangeAssign = (selected) => {
+    setSelectedEmployee(selected);
+  };
+
+  const handleChangeFollower = (selected) => {
+    setSelectedFollowerEmployee(selected);
+  };
+
+  const handleChangeProject = (selected) => {
+    setSelectedProjects(selected);
+  };
+
   return (
     <div className="main-container">
       <div className="d-flex justify-content-between">
-        <h2 className="text-success text-start p-2">Add Task</h2>
+        <h2 className="text-success text-start p-2">Edit Task</h2>
         <a href="/task" className="p-2">
           <button className="btn btn-primary">
             <IoIosArrowRoundBack /> Back
@@ -64,81 +169,116 @@ return false;
       <div>
         <form onSubmit={handleSubmit}>
           <div className="row">
+            {/* Title */}
             <div className="col-md-6">
               <div className="mb-3">
-                <label htmlFor="fullname" className="form-label">
-                  Employee Id <span className="text-success"><b>*</b></span>
+                <label className="form-label">
+                  Title<span className="text-success"><b>*</b></span>
                 </label>
                 <input
                   type="text"
                   className="form-control"
-                  name="employeeid"
+                  name="title"
                   onChange={handleChange}
-                  value="EMP"
+                  value={inputs.title}
+                  placeholder="Enter project title"
                   required
                 />
               </div>
             </div>
+
+            {/* Start Date */}
+            <div className="col-md-3">
+              <div className="mb-3">
+                <label className="form-label">
+                  Start Date<span className="text-success"><b>*</b></span>
+                </label>
+                <input
+                  type="date"
+                  className="form-control"
+                  name="startdate"
+                  onChange={handleChange}
+                  value={inputs.startdate}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* End Date */}
+            <div className="col-md-3">
+              <div className="mb-3">
+                <label className="form-label">
+                  End Date<span className="text-success"><b>*</b></span>
+                </label>
+                <input
+                  type="date"
+                  className="form-control"
+                  name="enddate"
+                  onChange={handleChange}
+                  value={inputs.enddate}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Projects */}
             <div className="col-md-6">
               <div className="mb-3">
-                <label htmlFor="fullname" className="form-label">
-                  Full Name <span className="text-success"><b>*</b></span>
+                <label className="form-label">
+                  Projects<span className="text-success"><b>*</b></span>
                 </label>
+                <Select
+                  // isMulti
+                  options={projectOptions}
+                  value={selectedProjects}
+                  onChange={handleChangeProject}
+                  placeholder="Select Projects"
+                />
+              </div>
+            </div>
+
+            {/* Assign To */}
+            <div className="col-md-6">
+              <div className="mb-3">
+                <label className="form-label">
+                  Assign To<span className="text-success"><b>*</b></span>
+                </label>
+                <Select
+                  // isMulti
+                  options={options}
+                  value={selectedEmployee}
+                  onChange={handleChangeAssign}
+                  placeholder="Select employee"
+                />
+              </div>
+            </div>
+
+            {/* Follower */}
+            <div className="col-md-6">
+              <div className="mb-3">
+                <label className="form-label">
+                  Follower<span className="text-success"><b>*</b></span>
+                </label>
+                <Select
+                  // isMulti
+                  options={options}
+                  value={selectedFollowerEmployee}
+                  onChange={handleChangeFollower}
+                  placeholder="Select follower"
+                />
+              </div>
+            </div>
+
+            {/* Description */}
+            <div className="col-md-6">
+              <div className="mb-3">
+                <label className="form-label">Description</label>
                 <input
                   type="text"
                   className="form-control"
-                  name="fullname"
+                  name="description"
                   onChange={handleChange}
-                  value={inputs.fullname}
-                  placeholder="Full Name"
-                  required
-                />
-              </div>
-            </div>
-            <div className="col-md-6">
-              <div className="mb-3">
-                <label htmlFor="mobile" className="form-label">
-                  Mobile <span className="text-success"><b>*</b></span>
-                </label>
-                <input
-                  type="number"
-                  className="form-control"
-                  name="mobile"
-                  onChange={handleChange}
-                  value={inputs.mobile}
-                  placeholder="Mobile"
-                  required
-                />
-              </div>
-            </div>
-            <div className="col-md-6">
-              <div className="mb-3">
-                <label htmlFor="email" className="form-label">
-                  Email <span className="text-success"><b>*</b></span>
-                </label>
-                <input
-                  type="email"
-                  className="form-control"
-                  name="email"
-                  onChange={handleChange}
-                  value={inputs.email}
-                  placeholder="Email"
-                  required
-                />
-              </div>
-            </div>
-            <div className="col-md-6">
-              <div className="mb-3">
-                <label htmlFor="exampleInputPassword1" className="form-label">
-                  Password <span className="text-success"><b>*</b></span>
-                </label>
-                <input
-                  type="password"
-                  className="form-control"
-                  onChange={handleChange}
-                  name="password"
-                  value={inputs.password}
-                  placeholder="Password"
+                  value={inputs.description}
                   required
                 />
               </div>
@@ -146,28 +286,17 @@ return false;
 
             <div className="col-md-6">
               <div className="mb-3">
-                <label htmlFor="exampleInputPassword1" className="form-label">
-                  Role <span className="text-success"><b>*</b></span>
+                <label htmlFor="tag" className="form-label">
+                Tag <span className="text-success"><b>*</b></span>
                 </label>
-                <select className="form-select" name="role" required onChange={handleChange}>
-                  <option value="1">Employee</option>
-                  <option value="2">Project Manager</option>
-                  <option value="3">SEO Manager</option>
-                  <option value="4">Development Manager</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="col-md-6">
-              <div className="mb-3">
-                <label htmlFor="exampleInputPassword1" className="form-label">
-                  Gender <span className="text-success"><b>*</b></span>
-                </label>
-                <select className="form-select form-controle" name="gender" onChange={handleChange} required>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
-                </select>
+                <input
+                  type="text"
+                  className="form-control"
+                  onChange={handleChange}
+                  name="tag"
+                  value={inputs.tag}
+                  placeholder="Enter tag"
+                />
               </div>
             </div>
 
@@ -177,20 +306,17 @@ return false;
                   Status <span className="text-success"><b>*</b></span>
                 </label>
                 <select className="form-select form-controle" name="status" onChange={handleChange} required>
-                  <option value="1">Active</option>
-                  <option value="2">InActive</option>
+                  <option value="In Process">In Process</option>
+                  <option value="Not Started">Not Started</option>
+                  <option value="Completed">Completed</option>
+                  <option value="On Hold">On Hold</option>
                 </select>
+
               </div>
             </div>
 
           </div>
-          <button
-            type="submit"
-            className="btn btn-primary"
-            onClick={handleSubmit}
-          >
-            Submit
-          </button>
+          <button type="submit" className="btn btn-primary">Submit</button>
         </form>
       </div>
     </div>

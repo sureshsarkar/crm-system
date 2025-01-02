@@ -5,11 +5,11 @@ const { generateTokenAndSetCookie, getIdFromToken } = require('../utils/generate
 
 exports.addTask = async(req,res)=>{
     try {
-        const {title,follower,assignto} = req.body;
+        const {title,startdate,enddate,follower,assignto,projectname} = req.body;
         const createdby = getIdFromToken(req,res);// get logedin user Id
 
-        if(!title || !follower || !assignto){
-            return res.status(400).send({
+        if(!title || !follower || !assignto || !startdate || !enddate || !projectname){
+            return res.status(201).send({
                 message:"Please fill all the fields correctly",
                 success:false
             })
@@ -17,19 +17,23 @@ exports.addTask = async(req,res)=>{
         const newTask = new taskModel({
             title,
             follower,
+            startdate,
+            enddate,
             assignto,
+            projectname,
             createdby:createdby.userId
         });
 
         await newTask.save();
-        return res.status(201).send({
+        return res.status(200).send({
             message:"Task created successfully",
+            success:true,
             taskData:newTask
         })
 
 
     } catch (error) {
-        return res.status(400).send({
+        return res.status(201).send({
             message: 'Server Error',
             success: false,
             error: error.message || error
@@ -41,10 +45,10 @@ exports.editTask = async(req, res)=>{
     try {
         const id = req.params.id;
 
-        const  {title,follower,assignto,projectname,tag,status,descreption} = req.body;
-
+        const  {title,startdate,enddate,follower,assignto,projectname,tag,status,descreption} = req.body;
+      
         const taskData = await taskModel.findById(id);
-        if(!title || !follower || !assignto){
+        if(!title || !follower || !assignto || !startdate || !enddate || !projectname){
             return res.status(201).send({
                 message:"Edit task data",
                 success:false,
@@ -52,17 +56,19 @@ exports.editTask = async(req, res)=>{
             })
         }
 
-        const createdby = getIdFromToken(req,res);// get logedin user Id
+        // const createdby = getIdFromToken(req,res);// get logedin user Id
 
         const newTask = {
             title,
             follower,
             assignto,
+            startdate,
+            enddate,
             projectname,
             tag,
             status,
             descreption,
-            createdby:createdby.userId
+            // createdby:createdby.userId
         };
 
         await taskModel.findByIdAndUpdate(id,newTask);
@@ -75,7 +81,7 @@ exports.editTask = async(req, res)=>{
         })
 
     } catch (error) {
-        return res.status(500).send({
+        return res.status(201).send({
             message:"Server Error",
             success:false,
             error: error.message || error
@@ -96,12 +102,13 @@ exports.getAllTasks = async(req, res)=>{
 
         return res.status(200).send({
             message:"Task got",
-            tasks:allTasks
+            tasks:allTasks,
+            success:true
         })
 
 
     } catch (error) {
-        return res.status(500).send({
+        return res.status(201).send({
             message:"Server Error",
             success:false,
             error: error.message || error
@@ -114,7 +121,7 @@ exports.deleteTask = async(req, res)=>{
         const id = req.params.id;
 
         if(!id){
-            return res.status(500).send({
+            return res.status(201).send({
                 message:"Invalid data Id",
                 success:false
             })
@@ -128,7 +135,7 @@ exports.deleteTask = async(req, res)=>{
         })
 
     } catch (error) {
-        return res.status(500).send({
+        return res.status(201).send({
             message:"Server error",
             success:false,
             error: error.message || error

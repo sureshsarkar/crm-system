@@ -7,27 +7,24 @@ import { IoIosPersonAdd } from "react-icons/io";
 import toast  from 'react-hot-toast';
 import { format } from 'date-fns';
 
-const ManageEmployee = () => {
-  const [employeeData, setEmployeeData] = useState([]);
+const ManageProject = () => {
+  const [projectData, setProjectData] = useState([]);
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(false);
 
   // Fetch employee
-  const getEmployees = async () => {
+  const getProject = async () => {
     try {
-      const { data } = await axios.get("/api/auth/employee");
-      
+      const { data } = await axios.get("/api/project/get-all");
+      console.log(data);
       if (data?.success) {
-        const formattedData = data.employee.map((employee, index) => ({
-          id: employee._id,
-          name: employee.fullname,
-          email: employee.email,
-          mobile: employee.mobile,
-          role: employee.role,
-          status: employee.status,
-          createdAt:format(new Date(employee.createdAt), 'dd/MM/yyyy HH:mm'),
+        const formattedData = data.project.map((project) => ({
+          id: project._id,
+          projectname: project.projectname,
+          status: project.status,
+          createdAt:format(new Date(project.createdAt), 'dd/MM/yyyy hh:mm a'),
         }));
-        setEmployeeData(formattedData);
+        setProjectData(formattedData);
         setRecords(formattedData);  // Initialize records with fetched data
       }else{
         toast.error(data.message);
@@ -36,19 +33,18 @@ const ManageEmployee = () => {
       
     } catch (error) {
       toast.error(error);
-      // console.log("Error fetching projects:", error);
     }
   };
 
   // Fetch data on component mount
   useEffect(() => {
-    getEmployees();
+    getProject();
   }, []);
 
   // Filter employee function
   const handleFilter = (event) => {
     const value = event.target.value.toLowerCase();
-    const filteredData = employeeData.filter((row) =>
+    const filteredData = projectData.filter((row) =>
       row.name.toLowerCase().includes(value)
     );
     setRecords(filteredData);
@@ -56,22 +52,25 @@ const ManageEmployee = () => {
 
   // Delete employee function
 
-const handleDeleteEmployee = async (id) => {
-  if (!window.confirm("Are you sure you want to delete this employee?")) return;
+const handleDeleteProject = async (id) => {
+  if (!window.confirm("Are you sure you want to delete this project?")) return;
   
   setLoading(true);
   try {
-    const { data } = await axios.delete(`/api/auth/delete-employee/${id}`);
+    const { data } = await axios.delete(`/api/project/delete/${id}`);
+   
+    console.log(data);
+    
     if (data.success) {
       toast.success(data.message);
-      const updatedEmployees = employeeData.filter(emp => emp.id !== id);
-      setEmployeeData(updatedEmployees);
-      setRecords(updatedEmployees);
+      const updatedProject = projectData.filter(emp => emp.id !== id);
+      setProjectData(updatedProject);
+      setRecords(updatedProject);
     } else {
       toast.error(data.message);
     }
   } catch (error) {
-    toast.error("Failed to delete employee");
+    toast.error("Failed to delete project");
   } finally {
     setLoading(false);
   }
@@ -80,23 +79,20 @@ const handleDeleteEmployee = async (id) => {
   // Table columns
   const columns = [
     // { name: "ID", selector: (row) => row.id, sortable: true },
-    { name: "Name", selector: (row) => row.name, sortable: true },
-    { name: "Email", selector: (row) => row.email, sortable: true },
-    { name: "Mobile", selector: (row) => row.mobile, sortable: true },
-    { name: "Role", selector: (row) => row.role==1? "Employee": row.role==2 ? "Project Manager"  : row.role==3 ? "SEO Manager" : "Development Manager", sortable: true },
+    { name: "Name", selector: (row) => row.projectname, sortable: true },
     { name: "Status", selector: (row) => (row.status==1 ? "Active" : "Inactive"), sortable: true },
     { name: "Created", selector: (row) => row.createdAt, sortable: true },
     {
       name: "Action",
       cell: (row) => (
         <div className="d-flex">
-          <a href={`/employee/edit/${row.id}`}>
+          <a href={`/project/edit/${row.id}`}>
             <button className="btn btn-primary m-1" title="Edit">
               <FaEdit />
             </button>
           </a>
           <button
-            onClick={() => handleDeleteEmployee(row.id)}
+            onClick={() => handleDeleteProject(row.id)}
             className="btn btn-danger m-1"
             title="Delete"
             disabled={loading}
@@ -111,8 +107,8 @@ const handleDeleteEmployee = async (id) => {
   return (
     <div className="main-container">
       <div className="d-flex justify-content-between">
-        <h2 className="text-success text-start p-2">Employee Data Table</h2>
-        <a href="/employee/add" className="p-2">
+        <h2 className="text-success text-start p-2">Project Data Table</h2>
+        <a href="/project/add" className="p-2">
           <button className="btn btn-primary">
             <IoIosPersonAdd /> Add
           </button>
@@ -140,4 +136,4 @@ const handleDeleteEmployee = async (id) => {
   );
 };
 
-export default ManageEmployee;
+export default ManageProject;

@@ -103,7 +103,7 @@ exports.editProject = async (req, res) => {
           // Check if the projectname already exists
           const existingProjectName = await projectModel.findOne({ projectname, _id: { $ne: id } });
           if (existingProjectName) {
-              return res.status(400).send({
+              return res.status(201).send({
                   message: 'Project with this projectname already exists',
                   success: false
               });
@@ -128,7 +128,7 @@ exports.editProject = async (req, res) => {
        });
 
     } catch (error) {
-        return res.status(400).send({
+        return res.status(201).send({
             message: 'Server error',
             success: false,
             error: error
@@ -151,7 +151,7 @@ exports.deleteProject = async(req,res)=>{
             }) 
         }
 
-        await projectModel.findById(id);
+        await projectModel.findByIdAndDelete(id);
         return res.status(200).send({
             message: "Project deleted",
             success: true

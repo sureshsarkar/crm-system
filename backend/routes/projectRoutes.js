@@ -4,7 +4,7 @@ const { createProject,editProject,deleteProject,getAllProject } = require('../co
 
 const router = express.Router();
 
-router.get('/get-all',getAllProject);
+router.get('/get-all',adminAuthMiddleware,getAllProject);
 router.post('/add',adminAuthMiddleware,createProject);
 router.put('/edit-project/:id',adminAuthMiddleware,editProject);
 router.delete('/delete/:id',adminAuthMiddleware,deleteProject);

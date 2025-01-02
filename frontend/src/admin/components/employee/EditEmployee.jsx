@@ -1,8 +1,44 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { IoIosArrowRoundBack } from "react-icons/io";
 import axios from 'axios'
+import { useNavigate, useParams } from "react-router-dom";
+import toast  from 'react-hot-toast';
 
 const EditEmployee = () => {
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { id } = useParams(); 
+
+   // Get employee details when the component is mounted
+   useEffect(() => {
+    const fetchEmployee = async () => {
+      try {
+        const { data } = await axios.put(`/api/auth/edit-employee/${id}`); // Assuming your backend endpoint is '/api/auth/employee/:id'
+        // console.log(data);
+        
+        if (data.success) {
+          setInputs({
+            fullname: data.employee.fullname,
+            email: data.employee.email,
+            // password: "", // Do not pre-fill password for security reasons
+            mobile: data.employee.mobile,
+            employeeid: data.employee.employeeid,
+            role: data.employee.role,
+            gender: data.employee.gender,
+            status: data.employee.status,
+          });
+        } else {
+          console.error(data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching employee details:", error);
+      }
+    };
+
+    fetchEmployee();
+  }, [id]); // Run once when the id changes
+
+  
   const [inputs, setInputs] = useState({
     fullname: "",
     email: "",
@@ -21,34 +57,35 @@ const EditEmployee = () => {
     });
   };
 
-
-
+ 
   // submit function 
   const handleSubmit = async (e) => {
     e.preventDefault();
       const formData =  {
         fullname: inputs.fullname,
         email: inputs.email,
-        password: inputs.password,
         mobile: inputs.mobile,
+        // password: inputs.password,
         employeeid: inputs.employeeid,
         role: inputs.role,
         gender: inputs.gender,
         status: inputs.status,
       }
-console.log(formData);
-return false;
+// console.log(formData);
+// return false;
 
     try {
-      const { data } = await axios.post("/api/v1/user/register",formData
+      const { data } = await axios.put(`/api/auth/edit-employee/${id}`,formData
        
       )
       if (data.success) {
-        alert("User registered Successfully");
-        navigate('/login')
+        toast.success(data.message);
+        // alert("User registered Successfully");
+        navigate('/employee')
       }
     } catch (error) {
-      console.log(error);
+      toast.error(data.message);
+      // console.log(error);
     }
   }
   return (
@@ -149,7 +186,7 @@ return false;
                 <label htmlFor="exampleInputPassword1" className="form-label">
                   Role <span className="text-success"><b>*</b></span>
                 </label>
-                <select className="form-select" name="role" required onChange={handleChange}>
+                <select className="form-select" name="role" value={inputs.role} required onChange={handleChange}>
                   <option value="1">Employee</option>
                   <option value="2">Project Manager</option>
                   <option value="3">SEO Manager</option>
@@ -163,7 +200,7 @@ return false;
                 <label htmlFor="exampleInputPassword1" className="form-label">
                   Gender <span className="text-success"><b>*</b></span>
                 </label>
-                <select className="form-select form-controle" name="gender" onChange={handleChange} required>
+                <select className="form-select form-controle" name="gender" onChange={handleChange} value={inputs.gender} required>
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
                   <option value="Other">Other</option>
@@ -176,7 +213,7 @@ return false;
                 <label htmlFor="exampleInputPassword1" className="form-label">
                   Status <span className="text-success"><b>*</b></span>
                 </label>
-                <select className="form-select form-controle" name="status" onChange={handleChange} required>
+                <select className="form-select form-controle" name="status" value={inputs.status} onChange={handleChange} required>
                   <option value="1">Active</option>
                   <option value="2">InActive</option>
                 </select>

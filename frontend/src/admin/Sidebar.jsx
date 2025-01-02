@@ -1,10 +1,31 @@
 import React from 'react'
 import 
 {BsCart3, BsGrid1X2Fill, BsFillArchiveFill, BsFillGrid3X3GapFill, BsPeopleFill, 
-  BsListCheck, BsMenuButtonWideFill, BsFillGearFill}
+  BsListCheck, BsMenuButtonWideFill, BsFillGearFill,BsBoxArrowRight}
  from 'react-icons/bs'
+ import axios from 'axios'
 
+ import { useNavigate } from 'react-router-dom'
 function Sidebar({openSidebarToggle, OpenSidebar}) {
+
+const navigate = useNavigate();
+    const handelLogout = async ()=>{
+         const isUser = localStorage.getItem('user');
+      
+
+         if(isUser){
+
+            try {
+            const { data } = await axios.get("/api/auth/logout");
+       
+            localStorage.removeItem("user");
+            navigate('/login')
+            } catch (error) {
+                
+            }
+         }
+         
+    }
   return (
     <aside id="sidebar" className={openSidebarToggle ? "sidebar-responsive": ""}>
         <div className='sidebar-title'>
@@ -16,13 +37,19 @@ function Sidebar({openSidebarToggle, OpenSidebar}) {
 
         <ul className='sidebar-list'>
             <li className='sidebar-list-item'>
-                <a href="/">
+                <a href="/dashboard">
                     <BsGrid1X2Fill className='icon'/> Dashboard
                 </a>
             </li>
             <li className='sidebar-list-item'>
+                <a href="/project">
+                    <BsFillArchiveFill className='icon'/> Projects
+                </a>
+            </li>
+
+            <li className='sidebar-list-item'>
                 <a href="/employee">
-                    <BsFillArchiveFill className='icon'/> Employee
+                    <BsPeopleFill className='icon'/> Employee
                 </a>
             </li>
             <li className='sidebar-list-item'>
@@ -50,6 +77,13 @@ function Sidebar({openSidebarToggle, OpenSidebar}) {
                     <BsFillGearFill className='icon'/> Setting
                 </a>
             </li>
+
+            <li className='sidebar-list-item'>
+                   <a href="#">
+                    <BsBoxArrowRight className='icon' onClick={handelLogout}/> Logout
+                    </a>
+            </li>
+
         </ul>
     </aside>
   )

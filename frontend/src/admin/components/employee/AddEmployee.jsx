@@ -1,10 +1,14 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { IoIosArrowRoundBack } from "react-icons/io";
-import axios from 'axios'
-import Select from 'react-select';
+import axios from "axios";
+import Select from "react-select";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const AddEmployee = () => {
   const [projectState, setProjectState] = useState([]);
+  const navigate = useNavigate();
+
   const [inputs, setInputs] = useState({
     fullname: "",
     email: "",
@@ -14,7 +18,7 @@ const AddEmployee = () => {
     role: "",
     gender: "",
     status: "",
-    projects:""
+    projects: "",
   });
 
   const handleChange = (e) => {
@@ -24,72 +28,77 @@ const AddEmployee = () => {
     });
   };
 
-
-
-  // submit function 
+  // submit function
   const handleSubmit = async (e) => {
     e.preventDefault();
-      const formData =  {
-        fullname: inputs.fullname,
-        email: inputs.email,
-        password: inputs.password,
-        mobile: inputs.mobile,
-        employeeid: inputs.employeeid,
-        role: inputs.role,
-        gender: inputs.gender,
-        status: inputs.status,
-        projects: selectedProjects.map(selectedVal=>selectedVal.value),
-      }
+    const formData = {
+      fullname: inputs.fullname,
+      email: inputs.email,
+      password: inputs.password,
+      mobile: inputs.mobile,
+      employeeid: inputs.employeeid,
+      role: inputs.role,
+      gender: inputs.gender,
+      status: inputs.status,
+      projects: selectedProjects.map((selectedVal) => selectedVal.value),
+    };
 
-// console.log(formData);
-// return false;
+    // console.log(formData);
+    // return false;
 
     try {
-      const { data } = await axios.post("/api/auth/register",formData)
+      const { data } = await axios.post("/api/auth/register", formData);
+
+      // console.log(data);
+      // return false
       if (data.success) {
-        alert("User registered Successfully");
-        navigate('/login')
+        // alert(data.message);
+        toast.success(data.message);
+        navigate("/employee");
+      }
+
+      if (!data.success) {
+        // alert(data.message);
+        toast.error(data.message);
       }
     } catch (error) {
       console.log(error);
     }
-  }
+  };
 
+  // function to get projects
 
-  // function to get projects  
-
-  const getProjects = async (e)=>{
+  const getProjects = async (e) => {
     try {
-      const {data} = await axios.get("/api/project/get-all")
-      if(data?.success){
+      const { data } = await axios.get("/api/project/get-all");
+      if (data?.success) {
         setProjectState(data?.project);
-        // console.log(projectState);
       }
-     
     } catch (error) {
       console.log(error);
     }
-  }
+  };
 
- 
-   // useEffect
-   useEffect(() => {
+
+  // useEffect
+  useEffect(() => {
     getProjects();
-}, []);
+  }, []);
 
 
-const [selectedProjects, setSelectedProjects] = useState(null);
+  const options = projectState.map((project) => ({
+    value: project._id,
+    label: project.projectname,
+  }));
 
-// Handle change event for the select element
-const handleChangeProject = (selected) => {
-  setSelectedProjects(selected)
-};
+  
+  const [selectedProjects, setSelectedProjects] = useState(null);
 
+  // Handle change event for the select element
+  const handleChangeProject = (selected) => {
+    setSelectedProjects(selected);
+  };
 
-const options = projectState.map((project) => ({
-  value: project._id, 
-  label: project.projectname 
-}));
 
 
   return (
@@ -108,7 +117,10 @@ const options = projectState.map((project) => ({
             <div className="col-md-6">
               <div className="mb-3">
                 <label htmlFor="fullname" className="form-label">
-                  Employee Id <span className="text-success"><b>*</b></span>
+                  Employee Id{" "}
+                  <span className="text-success">
+                    <b>*</b>
+                  </span>
                 </label>
                 <input
                   type="text"
@@ -124,34 +136,33 @@ const options = projectState.map((project) => ({
             <div className="col-md-6">
               <div className="mb-3">
                 <label htmlFor="exampleInputPassword1" className="form-label">
-                  Projects <span className="text-success"><b>*</b></span>
+                  Projects{" "}
+                  <span className="text-success">
+                    <b>*</b>
+                  </span>
                 </label>
 
                 <Select
-      isMulti = {true}
-      name="projects"
-      options={options}
-      value={selectedProjects}
-      onChange={handleChangeProject}
-      className="basic-multi-select"
-      classNamePrefix="select"
-      placeholder="Select Projects"
-    />
-    
-    
-                {/* <select className="form-select" name="projects" multiple required onChange={handleChangeProject}>
-                {projectState.map((project) => (
-                  <option key={project._id} value={project._id}>{project.projectname}</option>
+                  isMulti={true}
+                  name="projects"
+                  options={options}
+                  value={selectedProjects}
+                  onChange={handleChangeProject}
+                  className="basic-multi-select"
+                  classNamePrefix="select"
+                  placeholder="Select Projects"
+                />
 
-                ))}
-                </select> */}
               </div>
             </div>
 
             <div className="col-md-6">
               <div className="mb-3">
                 <label htmlFor="fullname" className="form-label">
-                  Full Name <span className="text-success"><b>*</b></span>
+                  Full Name{" "}
+                  <span className="text-success">
+                    <b>*</b>
+                  </span>
                 </label>
                 <input
                   type="text"
@@ -167,7 +178,10 @@ const options = projectState.map((project) => ({
             <div className="col-md-6">
               <div className="mb-3">
                 <label htmlFor="mobile" className="form-label">
-                  Mobile <span className="text-success"><b>*</b></span>
+                  Mobile{" "}
+                  <span className="text-success">
+                    <b>*</b>
+                  </span>
                 </label>
                 <input
                   type="number"
@@ -183,7 +197,10 @@ const options = projectState.map((project) => ({
             <div className="col-md-6">
               <div className="mb-3">
                 <label htmlFor="email" className="form-label">
-                  Email <span className="text-success"><b>*</b></span>
+                  Email{" "}
+                  <span className="text-success">
+                    <b>*</b>
+                  </span>
                 </label>
                 <input
                   type="email"
@@ -199,7 +216,10 @@ const options = projectState.map((project) => ({
             <div className="col-md-6">
               <div className="mb-3">
                 <label htmlFor="exampleInputPassword1" className="form-label">
-                  Password <span className="text-success"><b>*</b></span>
+                  Password{" "}
+                  <span className="text-success">
+                    <b>*</b>
+                  </span>
                 </label>
                 <input
                   type="password"
@@ -216,9 +236,17 @@ const options = projectState.map((project) => ({
             <div className="col-md-6">
               <div className="mb-3">
                 <label htmlFor="exampleInputPassword1" className="form-label">
-                  Role <span className="text-success"><b>*</b></span>
+                  Role{" "}
+                  <span className="text-success">
+                    <b>*</b>
+                  </span>
                 </label>
-                <select className="form-select" name="role" required onChange={handleChange}>
+                <select
+                  className="form-select"
+                  name="role"
+                  required
+                  onChange={handleChange}
+                >
                   <option value="1">Employee</option>
                   <option value="2">Project Manager</option>
                   <option value="3">SEO Manager</option>
@@ -230,9 +258,17 @@ const options = projectState.map((project) => ({
             <div className="col-md-6">
               <div className="mb-3">
                 <label htmlFor="exampleInputPassword1" className="form-label">
-                  Gender <span className="text-success"><b>*</b></span>
+                  Gender{" "}
+                  <span className="text-success">
+                    <b>*</b>
+                  </span>
                 </label>
-                <select className="form-select form-controle" name="gender" onChange={handleChange} required>
+                <select
+                  className="form-select form-controle"
+                  name="gender"
+                  onChange={handleChange}
+                  required
+                >
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
                   <option value="Other">Other</option>
@@ -243,15 +279,22 @@ const options = projectState.map((project) => ({
             <div className="col-md-6">
               <div className="mb-3">
                 <label htmlFor="exampleInputPassword1" className="form-label">
-                  Status <span className="text-success"><b>*</b></span>
+                  Status{" "}
+                  <span className="text-success">
+                    <b>*</b>
+                  </span>
                 </label>
-                <select className="form-select form-controle" name="status" onChange={handleChange} required>
+                <select
+                  className="form-select form-controle"
+                  name="status"
+                  onChange={handleChange}
+                  required
+                >
                   <option value="1">Active</option>
                   <option value="2">InActive</option>
                 </select>
               </div>
             </div>
-
           </div>
           <button
             type="submit"

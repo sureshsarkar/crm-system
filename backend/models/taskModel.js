@@ -5,43 +5,50 @@ const taskSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Title is required']
     },
-    tasktimer:{
-        type:Number,
-        default:0
+    startdate: {
+        type: Date,
+        required: [true, 'Start date is required']
+    },
+    enddate: {
+        type: Date,
+        required: [true, 'End date is required']
+    },
+    tasktimer: {
+        type: Number,
+        default: 0
     },
     createdby: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'employees',
-        require: [true, 'creater id is required']
+        required: [true, 'Creator ID is required']
     },
     follower: {
-      type: mongoose.Types.ObjectId,
-      ref: 'employees',
-      require: [true, 'user id is required']
-
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'employees',
+        required: [true, 'Follower ID is required']
     },
     assignto: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'employees',
-        require: [true, 'Assign id is required']
+        required: [true, 'Assignee ID is required']
     },
     projectname: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'projects',
-        require: [true, 'project id is required']
+        required: [true, 'project id is required']
     },
     tag: {
         type: String,
-         default: 'Task Tag'
+        default: 'Task Tag'
     },
     status: {
         type: String,
         enum: ['Not Started', 'In Process', 'Completed', 'On Hold'],
         default: 'Not Started'
     },
-    descreption: {
+    description: {
         type: String,
-        default: 'Task Descreption'
+        default: 'Task Description'
     }
 }, { timestamps: true });
 

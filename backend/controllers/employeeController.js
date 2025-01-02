@@ -1,14 +1,22 @@
 
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const employeeModel = require('../models/EmployeeModel');
+const employeeModel = require('../models/employeeModel');
 const { generateTokenAndSetCookie, getIdFromToken } = require('../utils/generateToken');
 // get all employee
 exports.getAllEmployee = async (req, res) => {
 
+    
     try {
 
         const employee = await employeeModel.find().select('-password');
+
+        if(!employee){
+            res.status(201).send({
+                message: "No user available",
+                success: false
+            })
+        }
 
         res.status(201).send({
             message: "Fetch all employee",
@@ -17,9 +25,9 @@ exports.getAllEmployee = async (req, res) => {
         })
     } catch (error) {
 
-        return res.status(400).send({
+        return res.status(201).send({
             message: 'Failed to get employee',
-            success: 'false',
+            success: false,
             error: error
         })
 
@@ -36,7 +44,7 @@ exports.registrationController = async (req, res) => {
 
         // Validation
         if (!employeeid || !fullname || !mobile || !email || !password || !gender || !role || !status) {
-            return res.status(400).send({
+            return res.status(201).send({
                 message: 'Please fill all fields',
                 success: false
             });
@@ -45,7 +53,7 @@ exports.registrationController = async (req, res) => {
         // Check if the email, mobile, or employeeid already exists
         const existingEmail = await employeeModel.findOne({ email });
         if (existingEmail) {
-            return res.status(400).send({
+            return res.status(201).send({
                 message: 'Employee with this email already exists',
                 success: false
             });
@@ -53,7 +61,7 @@ exports.registrationController = async (req, res) => {
 
         const existingMobile = await employeeModel.findOne({ mobile });
         if (existingMobile) {
-            return res.status(400).send({
+            return res.status(201).send({
                 message: 'Employee with this mobile number already exists',
                 success: false
             });
@@ -61,7 +69,7 @@ exports.registrationController = async (req, res) => {
 
         const existingEmployeeId = await employeeModel.findOne({ employeeid });
         if (existingEmployeeId) {
-            return res.status(400).send({
+            return res.status(201).send({
                 message: 'Employee with this employee ID already exists',
                 success: false
             });
@@ -86,7 +94,7 @@ exports.registrationController = async (req, res) => {
         await newEmployee.save();
       
         // Generate token and set cookie
-       const token =  generateTokenAndSetCookie(newEmployee._id,newEmployee.role, res);
+    //    const token =  generateTokenAndSetCookie(newEmployee._id,newEmployee.role, res);
     //    return res.status(201).send({
     //     token:token
     //    });
@@ -94,12 +102,12 @@ exports.registrationController = async (req, res) => {
        return res.status(201).send({
            message: "User created successfully",
            success: true,
-           token: token,
-           role:newEmployee.role
+        //    token: token,
+        //    role:newEmployee.role
        });
 
     } catch (error) {
-        return res.status(400).send({
+        return res.status(201).send({
             message: 'Error in registration callback',
             success: false,
             error: error

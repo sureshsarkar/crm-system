@@ -15,7 +15,7 @@ const { adminAuthMiddleware } = require('../middlewares/adminAuthMiddleware');
 const router = express.Router();
 
 // Get all employee
-router.get('/employee',adminAuthMiddleware, getAllEmployee);
+router.get('/employee', getAllEmployee);
 // Get one employee
 router.get('/myprofile',adminAuthMiddleware, myProfile);
 
