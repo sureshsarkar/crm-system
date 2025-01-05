@@ -25,7 +25,34 @@ exports.getAllProject = async (req, res) => {
     }
 }
 
-// create project registration  dsfsdifdsfsdf
+// funcition get projects by Ids start 
+exports.getProjectsByIds = async (req,res)=>{
+    try {
+        const projectIds = req.query.ids;
+
+        if (!projectIds || projectIds.length === 0) {
+                return res.status(200).send({
+                    message: 'No project IDs provided',
+                    success:false
+                });
+          }
+
+          const projects = await projectModel.find({ _id: { $in: projectIds } });
+        
+        return res.status(200).send({
+            message: 'Got the projects',
+            success: true,
+            projects:projects,
+        });
+    } catch (error) {
+        return res.status(201).send({
+            message: 'Server error',
+            success: false,
+            error: error
+        }); 
+    }
+}
+// funcition get projects by Ids end
 
 // project registration
 exports.createProject = async (req, res) => {

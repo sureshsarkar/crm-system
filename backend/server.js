@@ -18,10 +18,12 @@ app.use(cookieParser());
 const userRoute = require('./routes/userRoutes');
 const taskRoute = require('./routes/taskRoutes');
 const projectRoute = require('./routes/projectRoutes');
+const timerRoute = require('./routes/timerRoutes');
 
 app.use('/api/auth', userRoute);
 app.use('/api/task', taskRoute);
 app.use('/api/project', projectRoute);
+app.use('/api/timer', timerRoute);
 
 app.listen(port, () => {
     connectToMongo();

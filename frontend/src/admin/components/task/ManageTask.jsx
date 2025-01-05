@@ -1,11 +1,13 @@
-import React, { useState,useEffect } from "react";
+import React, { useState,useEffect,useRef } from "react";
 import axios from "axios";
 import DataTable from "react-data-table-component";
 import { TiArchive } from "react-icons/ti";
 import { FaEdit } from "react-icons/fa";
 import { IoIosPersonAdd } from "react-icons/io";
+import { MdOutlineWatchLater,MdWatchLater } from "react-icons/md";
 import toast  from 'react-hot-toast';
 import { format } from 'date-fns';
+
 
 
 const ManageTask = () => {
@@ -15,6 +17,16 @@ const ManageTask = () => {
   const [projects, setProjects] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [timerRunning, setTimerRunning] = useState(false);
+  const [taskId, setTastId] = useState(null);
+  const closeButtonRef = useRef(null);
+
+    const [inputs, setInputs] = useState({
+      starttime: "",
+      timerid: "",
+      comment: "",
+      totalduration: ""
+    });
 
    // Fetch Projects
    const getProjects = async () => {
@@ -70,6 +82,23 @@ const ManageTask = () => {
     }
   };
 
+  // get task timer status start 
+  const getTimerStatus =  ()=>{
+    const timerStatus  = JSON.parse(localStorage.getItem('timer'));
+
+    if(timerStatus?.starttimer){
+      setTimerRunning(true)
+      setTastId(timerStatus.taskid)
+    }
+    // console.log(timerRunning);
+  }
+  // get task timer status end
+
+
+  useEffect(() => {
+     getTimerStatus();
+  }, []);
+
   // Fetch data on component mount
   useEffect(() => {
     const fetchData = async () => {
@@ -78,23 +107,41 @@ const ManageTask = () => {
       await getTasks();
     };
     fetchData();
+
   }, [projects]);
 
 
-
-
-  // const data = [
-  //   { id: 1, name: "John Doe", age: 28 },
-  //   { id: 2, name: "Jane Smith", age: 34 },
-  //   { id: 3, name: "Sam Wilson", age: 23 }
-  // ];
-
   const columns = [
     { name: "S.N.", selector: (row) => row.sn, sortable: true },
+    {
+      name: "Timer",
+      cell: (row) => (
+        <div className="timerButton" data-id={row.id}>
+          {timerRunning  && row.id==taskId? 
+          <button className="btn" data-bs-toggle="modal" data-bs-target="#staticBackdrop" title="Stop Timer">
+             <MdWatchLater />
+          </button>
+           :
+           <button className="btn" title="Start Timer" onClick={handelStartTimer}>
+             <MdOutlineWatchLater />
+          </button>
+           }
+          </div>
+      ),
+    },
+    { name: "Status", 
+      cell:(row)=>(
+        <select className="form-select form-controle" name="status" onChange={handleChange}  value={row.status} required>
+          <option value="In Process">In Process</option>
+          <option value="Not Started">Not Started</option>
+          <option value="Completed">Completed</option>
+          <option value="On Hold">On Hold</option>
+        </select>
+      )
+    },
     { name: "Title", selector: (row) => row.title, sortable: true },
     { name: "Project Name", selector: (row) => row.projectname, sortable: true },
     { name: "Assign", selector: (row) => row.assignto, sortable: true },
-    { name: "Status", selector: (row) => row.status, sortable: true },
     { name: "Created", selector: (row) => row.createdAt, sortable: true },
     {
       name: "Action",
@@ -159,6 +206,89 @@ const handleDeleteEmployee = async (id) => {
   }
 };
 
+
+const handelStartTimer = async (event)=>{
+  const parentDiv = event.target.closest('.timerButton');
+  const taskId = parentDiv ? parentDiv.getAttribute('data-id') : null;
+  // const assignerId = parentDiv ? parentDiv.getAttribute('data-assignto') : null;
+
+  try {
+    const {data} = await axios.get(`/api/task/get-by-id/${taskId}`);
+
+    if(data?.task){
+      const taskRef = data?.task;
+    await startTimer(taskRef);
+          getTimerStatus();
+
+    }
+    
+  } catch (error) {
+    console.log(error);
+    
+  }
+}
+
+const startTimer = async (taskRef)=>{
+    const taskdataSchema = {
+      taskid:taskRef._id,
+      assignid:taskRef.assignto,
+    }
+    const {data} = await axios.post("/api/timer/add",taskdataSchema);
+    if(data?.success){
+        const starttimer = data?.timerdata.timer.isrunning;
+        const taskid = data?.timerdata.taskid;
+        const timerid = data?.timerdata._id;
+        toast.success("Timer Started!");
+        const now = new Date();
+        const item = {
+          starttimer: starttimer,
+          taskid:taskid,
+          timerid:timerid,
+          started:now.getTime(),
+          timerexpiry: now.getTime() + 15 * 24 * 60 * 60 * 1000,  // Expiry time in milliseconds
+        };
+        localStorage.setItem("timer", JSON.stringify(item));
+        // navigate("/dashboard");
+    } else {
+      toast.error(data.message || "Invalid credentials");
+    }
+}
+
+const handelStopTimer = async()=>{
+  try {
+    const now = new Date();
+    const timerStatus  = JSON.parse(localStorage.getItem('timer'));
+      if(timerStatus.starttimer){
+        inputs.starttime = new Date(timerStatus.started).toISOString();
+        inputs.timerid = timerStatus.timerid;
+        inputs.totalduration =now.getTime() - timerStatus.started;
+        const {data} = await axios.post("/api/timer/edit",inputs);
+
+        if(data.success){
+          setTimerRunning(false)
+           // Auto click the close button
+          if (closeButtonRef.current) {
+            closeButtonRef.current.click();
+          }
+          toast.success(data.message);
+        }
+      }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const closeModel = (e)=>{
+  const modal = bootstrap.Modal.getInstance(e.target.closest('.modal'));
+  modal.hide();
+}
+  const handleChange = (e) => {
+    setInputs({
+      ...inputs,
+      [e.target.name]: e.target.value,
+    });
+  };
+
   return (
     <div className="main-container">
       <div className="d-flex justify-content-between">
@@ -177,6 +307,26 @@ const handleDeleteEmployee = async (id) => {
             onChange={handelFilter}
           />
         </div>
+
+          <div className="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false"  aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div className="modal-dialog">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h1 className="modal-title fs-5 text-dark" id="staticBackdropLabel">Add a comment</h1>
+                  <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div className="modal-body">
+                <textarea name="comment" value={inputs.comment} onChange={handleChange} placeholder="Add a comment"/>
+
+                </div>
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-secondary" data-bs-dismiss="modal" ref={closeButtonRef}>Close</button>
+                  <button type="button" className="btn btn-primary" onClick={handelStopTimer}>Submit</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        {/* model end  */}
         <DataTable
           columns={columns}
           data={records}

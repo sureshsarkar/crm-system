@@ -80,12 +80,18 @@ const AddTask = () => {
   };
 
   // Fetch projects
-  const getProjects = async () => {
+  const getProjectsByIds = async (projectIds) => {
     try {
-      const { data } = await axios.get("/api/project/get-all");
-      if (data?.success) {
-        setProjectState(data?.project);
+      const resp = await axios.get(`/api/project/get-projects-by-ids`,{params:{ids:projectIds}});
+      // console.log(resp.data.projects);
+
+      if (resp?.data?.success) {
+        setProjectState(resp?.data?.projects);
       }
+      // const { data } = await axios.get("/api/project/get-all");
+      // if (data?.success) {
+      //   setProjectState(data?.project);
+      // }
     } catch (error) {
       console.error(error);
     }
@@ -93,7 +99,6 @@ const AddTask = () => {
 
   useEffect(() => {
     getEmployee();
-    getProjects();
   }, []);
 
   // Employee options for select
@@ -110,13 +115,14 @@ const AddTask = () => {
 
   // Handle select changes
   const handleChangeAssign = async (selected) => {
-    console.log(selected.value);
-const id = selected.value;
-    const {data} = await axios.get(`api/auth/edit-emopoyee/${id}`)
-    console.log(data);
-    
     setSelectedEmployee(selected);
 
+    // set projects
+    const { data } = await axios.put(`/api/auth/edit-employee/${selected.value}`);
+    if (data?.employee?.projects?.length > 0) {
+      const projectIds =data?.employee?.projects;
+      await getProjectsByIds(projectIds);
+    }
   };
 
   const handleChangeFollower = (selected) => {

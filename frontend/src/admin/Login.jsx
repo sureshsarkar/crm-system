@@ -26,18 +26,17 @@ const Login = () => {
     e.preventDefault();
     try {
 
-        // console.log(inputs);
-        // return false
-        
       const { data } = await axios.post("/api/auth/login", inputs);
 
       if (data.success) {
-
-      
-        
-        toast.success("Login Successful!");
-        localStorage.setItem("user", JSON.stringify(data.token));
-        navigate("/dashboard");
+          toast.success("Login Successful!");
+          const now = new Date();
+          const item = {
+            value: data.token,
+            expiry: now.getTime() + 15 * 24 * 60 * 60 * 1000,  // Expiry time in milliseconds
+          };
+          localStorage.setItem("user", JSON.stringify(item));
+          navigate("/dashboard");
       } else {
         toast.error(data.message || "Invalid credentials");
       }

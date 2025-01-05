@@ -81,13 +81,26 @@ const EditTask = () => {
     }
   };
 
+
   // Fetch projects
-  const getProjects = async () => {
+  const getProjectsByIds = async (assignId) => {
     try {
-      const { data } = await axios.get("/api/project/get-all");
-      if (data?.success) {
-        setProjectState(data?.project);
+      const { data } = await axios.put(`/api/auth/edit-employee/${assignId}`);
+      if (data?.employee?.projects?.length > 0) {
+        const projectIds =data?.employee?.projects;
+        const resp = await axios.get(`/api/project/get-projects-by-ids`,{params:{ids:projectIds}});
+        if (resp?.data?.success) {
+          setProjectState(resp?.data?.projects);
+          console.log(resp.data.projects);
+        }
       }
+      // console.log(resp.data.projects);
+
+
+      // const { data } = await axios.get("/api/project/get-all");
+      // if (data?.success) {
+      //   setProjectState(data?.project);
+      // }
     } catch (error) {
       console.error(error);
     }
@@ -96,7 +109,7 @@ const EditTask = () => {
   
   useEffect(() => {
     getEmployee();
-    getProjects();
+    // getProjects();
   }, []);
   
   useEffect(() => {
@@ -113,10 +126,13 @@ const EditTask = () => {
             description: data.taskData.description,
             status: data.taskData.status
           });
-          
-          setSelectedEmployee(employeeState.filter((p) => data.taskData.assignto.includes(p._id)).map((p) => ({ value: p._id, label: p.fullname }))[0]);
+
+           setSelectedEmployee(employeeState.filter((p) => data.taskData.assignto.includes(p._id)).map((p) => ({ value: p._id, label: p.fullname }))[0]);
+          await getProjectsByIds(selectedEmployee.value);
+          // console.log(selectedEmployee.value);
           setSelectedFollowerEmployee(employeeState.filter((p) => data.taskData.follower.includes(p._id)).map((p) => ({ value: p._id, label: p.fullname }))[0]);
           setSelectedProjects(projectState.filter((p) => data.taskData.projectname.includes(p._id)).map((p) => ({ value: p._id, label: p.projectname }))[0]);
+          return false
         }
       } catch (error) {
         toast.error("Failed to fetch task details");
@@ -144,8 +160,9 @@ const EditTask = () => {
   }));
 
   // Handle select changes
-  const handleChangeAssign = (selected) => {
+  const handleChangeAssign = async (selected) => {
     setSelectedEmployee(selected);
+    await getProjectsByIds(selected.value);
   };
 
   const handleChangeFollower = (selected) => {
@@ -221,21 +238,6 @@ const EditTask = () => {
               </div>
             </div>
 
-            {/* Projects */}
-            <div className="col-md-6">
-              <div className="mb-3">
-                <label className="form-label">
-                  Projects<span className="text-success"><b>*</b></span>
-                </label>
-                <Select
-                  // isMulti
-                  options={projectOptions}
-                  value={selectedProjects}
-                  onChange={handleChangeProject}
-                  placeholder="Select Projects"
-                />
-              </div>
-            </div>
 
             {/* Assign To */}
             <div className="col-md-6">
@@ -252,6 +254,23 @@ const EditTask = () => {
                 />
               </div>
             </div>
+
+            {/* Projects */}
+            <div className="col-md-6">
+              <div className="mb-3">
+                <label className="form-label">
+                  Projects<span className="text-success"><b>*</b></span>
+                </label>
+                <Select
+                  // isMulti
+                  options={projectOptions}
+                  value={selectedProjects}
+                  onChange={handleChangeProject}
+                  placeholder="Select Projects"
+                />
+              </div>
+            </div>
+
 
             {/* Follower */}
             <div className="col-md-6">
@@ -305,7 +324,7 @@ const EditTask = () => {
                 <label htmlFor="exampleInputPassword1" className="form-label">
                   Status <span className="text-success"><b>*</b></span>
                 </label>
-                <select className="form-select form-controle" name="status" onChange={handleChange} required>
+                <select className="form-select form-controle" name="status" onChange={handleChange}  value={inputs.status} required>
                   <option value="In Process">In Process</option>
                   <option value="Not Started">Not Started</option>
                   <option value="Completed">Completed</option>

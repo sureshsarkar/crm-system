@@ -14,6 +14,8 @@ const { adminAuthMiddleware } = require('../middlewares/adminAuthMiddleware');
 // router object 
 const router = express.Router();
 
+router.get('/dashboard',adminAuthMiddleware, deleteEmployee);
+
 // Get all employee
 router.get('/employee', getAllEmployee);
 // Get one employee

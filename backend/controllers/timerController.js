@@ -1,34 +1,34 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const taskModel = require('../models/taskModel');
-const { generateTokenAndSetCookie, getIdFromToken } = require('../utils/generateToken');
+const timerModel = require('../models/timerModel');
 
-exports.addTask = async(req,res)=>{
+exports.addTimer = async(req,res)=>{
     try {
-        const {title,startdate,enddate,follower,assignto,projectname} = req.body;
-        const createdby = getIdFromToken(req,res);// get logedin user Id
+        const {taskid,assignid} = req.body;
 
-        if(!title || !follower || !assignto || !startdate || !enddate || !projectname){
+        if(!taskid || !assignid){
             return res.status(201).send({
-                message:"Please fill all the fields correctly",
+                message:"Invaild data",
                 success:false
             })
         }
-        const newTask = new taskModel({
-            title,
-            follower,
-            startdate,
-            enddate,
-            assignto,
-            projectname,
-            createdby:createdby.userId
+
+       
+
+        const newTimer = new timerModel({
+            taskid,
+            assignid,
+            timer: {
+                starttime: new Date(),
+                isrunning: true
+            }
         });
 
-        await newTask.save();
+        await newTimer.save();
         return res.status(200).send({
-            message:"Task created successfully",
+            message:"Timer started successfully",
             success:true,
-            taskData:newTask
+            timerdata:newTimer
         })
 
 
@@ -53,7 +53,7 @@ exports.getById = async (req,res) =>{
             })
         }
 
-        const taskData = await taskModel.findById(id,'_id assignto');
+        const taskData = await timerModel.findById(id,'_id assignto');
 
         if(taskData){
             return res.status(200).send({
@@ -73,43 +73,34 @@ exports.getById = async (req,res) =>{
 }
 // function to get data by Id end
 
-exports.editTask = async(req, res)=>{
+exports.editTimer = async(req, res)=>{
     try {
-        const id = req.params.id;
-
-        const  {title,startdate,enddate,follower,assignto,projectname,tag,status,descreption} = req.body;
+        const  {timerid,comment,totalduration,starttime} = req.body;
       
-        const taskData = await taskModel.findById(id);
-        if(!title || !follower || !assignto || !startdate || !enddate || !projectname){
+        if(!timerid || !comment || !totalduration || !starttime){
             return res.status(201).send({
-                message:"Edit task data",
+                message:"Invaild data",
                 success:false,
-                taskData:taskData
+                res:req.body
             })
         }
 
-        // const createdby = getIdFromToken(req,res);// get logedin user Id
-
+     
         const newTask = {
-            title,
-            follower,
-            assignto,
-            startdate,
-            enddate,
-            projectname,
-            tag,
-            status,
-            descreption,
-            // createdby:createdby.userId
+            comment,
+            timer: {
+                starttime: starttime,
+                stoptime: new Date(),
+                isrunning: false,
+                totalduration:totalduration
+            }
         };
 
-        await taskModel.findByIdAndUpdate(id,newTask);
-        const updatedTask = await taskModel.findById(id);
+        await timerModel.findByIdAndUpdate(timerid,newTask);
 
         return res.status(200).send({
-            message:"Task updated",
-            success:true,
-            taskData:updatedTask
+            message:"Timer stoped",
+            success:true
         })
 
     } catch (error) {
@@ -121,9 +112,9 @@ exports.editTask = async(req, res)=>{
     }
 }
 
-exports.getAllTasks = async(req, res)=>{
+exports.getAllTimers = async(req, res)=>{
     try {
-        const allTasks = await taskModel.find();
+        const allTasks = await timerModel.find();
 
         if(!allTasks){
             return res.status(201).send({
@@ -148,7 +139,7 @@ exports.getAllTasks = async(req, res)=>{
     }
 }
 
-exports.deleteTask = async(req, res)=>{
+exports.deleteTimer = async(req, res)=>{
     try {
         const id = req.params.id;
 
@@ -159,8 +150,8 @@ exports.deleteTask = async(req, res)=>{
             })
         }
 
-        // const task = await taskModel.deleteMany({}); // to delete all
-        const task = await taskModel.findByIdAndDelete(id);
+        // const task = await timerModel.deleteMany({}); // to delete all
+        const task = await timerModel.findByIdAndDelete(id);
         return res.status(200).send({
             message: "Task deleted",
             success: true
