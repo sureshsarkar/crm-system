@@ -270,6 +270,11 @@ const startTimer = async (taskRef)=>{
 
 const handelStopTimer = async()=>{
   try {
+
+    if(inputs.comment==''){
+      toast.error("Add a comment");
+      return false
+    }
     const now = new Date();
     const timerStatus  = JSON.parse(localStorage.getItem('timer'));
       if(timerStatus.starttimer){
@@ -277,8 +282,11 @@ const handelStopTimer = async()=>{
         inputs.timerid = timerStatus.timerid;
         inputs.totalduration =now.getTime() - timerStatus.started;
         const {data} = await axios.post("/api/timer/edit",inputs);
-
+        
         if(data.success){
+
+          localStorage.removeItem("timer");
+
           setTimerRunning(false)
            // Auto click the close button
           if (closeButtonRef.current) {
