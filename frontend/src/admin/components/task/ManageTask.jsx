@@ -118,8 +118,8 @@ const ManageTask = () => {
       cell: (row) => (
         <div className="timerButton" data-id={row.id}>
           {timerRunning  && row.id==taskId? 
-          <button className="btn" data-bs-toggle="modal" data-bs-target="#staticBackdrop" title="Stop Timer">
-             <MdWatchLater />
+          <button className="btn stoptimerCLS" data-bs-toggle="modal" data-bs-target="#staticBackdrop" title="Stop Timer">
+            <img src="./icon-clock.gif" alt="" />
           </button>
            :
            <button className="btn" title="Start Timer" onClick={handelStartTimer}>
@@ -139,7 +139,16 @@ const ManageTask = () => {
         </select>
       )
     },
-    { name: "Title", selector: (row) => row.title, sortable: true },
+    { 
+      name: "Title", 
+      selector: (row) => row.title, 
+      sortable: true,
+      cell: (row) => (
+        <div title={row.title} className="titleCell">
+          {row.title}
+        </div>
+      ),
+    },
     { name: "Project Name", selector: (row) => row.projectname, sortable: true },
     { name: "Assign", selector: (row) => row.assignto, sortable: true },
     { name: "Created", selector: (row) => row.createdAt, sortable: true },
@@ -211,6 +220,11 @@ const handelStartTimer = async (event)=>{
   const parentDiv = event.target.closest('.timerButton');
   const taskId = parentDiv ? parentDiv.getAttribute('data-id') : null;
   // const assignerId = parentDiv ? parentDiv.getAttribute('data-assignto') : null;
+
+  if(timerRunning){
+    toast.error("First of all stop other task");
+    return false
+  }
 
   try {
     const {data} = await axios.get(`/api/task/get-by-id/${taskId}`);

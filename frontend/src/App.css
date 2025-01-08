@@ -243,3 +243,11 @@ label{
 .table-width{
   width: 100%;
 }
+.titleCell{
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.stoptimerCLS img{
+  width: 20px;
+}
