@@ -1,31 +1,35 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import 
 {BsCart3, BsGrid1X2Fill, BsFillArchiveFill, BsFillGrid3X3GapFill, BsPeopleFill, 
   BsListCheck, BsMenuButtonWideFill, BsFillGearFill,BsBoxArrowRight}
  from 'react-icons/bs'
- import axios from 'axios'
 
  import { useNavigate } from 'react-router-dom'
-function Sidebar({openSidebarToggle, OpenSidebar}) {
+import toast from 'react-hot-toast';
+import { getRole } from '../utills/CustomFunctions';
+function Sidebar({openSidebarToggle, OpenSidebar,getRole,roleAuth}) {
 
-const navigate = useNavigate();
+    useEffect(  () =>{
+        getRole();
+    },[roleAuth])
+
+    const navigate = useNavigate();
+    
     const handelLogout = async ()=>{
          const isUser = localStorage.getItem('user');
-      
 
          if(isUser){
-
             try {
-            const { data } = await axios.get("/api/auth/logout");
-       
-            localStorage.removeItem("user");
-            navigate('/login')
+                localStorage.removeItem("user");
+                toast.success("Logout successfully");
+                navigate('/login');
             } catch (error) {
                 
             }
          }
-         
     }
+
+
   return (
     <aside id="sidebar" className={openSidebarToggle ? "sidebar-responsive": ""}>
         <div className='sidebar-title'>
@@ -41,22 +45,36 @@ const navigate = useNavigate();
                     <BsGrid1X2Fill className='icon'/> Dashboard
                 </a>
             </li>
-            <li className='sidebar-list-item'>
-                <a href="/project">
-                    <BsFillArchiveFill className='icon'/> Projects
-                </a>
-            </li>
+            {
+                roleAuth === 5 ? (
+                    <li className='sidebar-list-item'>
+                    <a href="/project">
+                        <BsFillArchiveFill className='icon'/> Projects
+                    </a>
+                </li>
+                ) : null // If roleAuth is not 5, render nothing (or you can render an alternative element)
+            }
 
-            <li className='sidebar-list-item'>
-                <a href="/employee">
-                    <BsPeopleFill className='icon'/> Employee
-                </a>
-            </li>
-            <li className='sidebar-list-item'>
-                <a href="/task">
-                    <BsFillGrid3X3GapFill className='icon'/> Task
-                </a>
-            </li>
+            {
+                roleAuth === 5 ? (
+                    <li className="sidebar-list-item">
+                    <a href="/employee">
+                        <BsPeopleFill className="icon" /> Employee
+                    </a>
+                    </li>
+                ) : null // If roleAuth is not 5, render nothing (or you can render an alternative element)
+            }
+
+            {
+                roleAuth === 1 || roleAuth === 2 || roleAuth === 3 || roleAuth === 4 || roleAuth === 5 ? (
+                    <li className='sidebar-list-item'>
+                    <a href="/task">
+                        <BsFillGrid3X3GapFill className='icon'/> Task
+                    </a>
+                </li>
+                ) : null // If roleAuth is not 5, render nothing (or you can render an alternative element)
+            }
+         
             <li className='sidebar-list-item'>
                 <a href="">
                     <BsPeopleFill className='icon'/> Customers
@@ -78,9 +96,9 @@ const navigate = useNavigate();
                 </a>
             </li>
 
-            <li className='sidebar-list-item'>
+            <li className='sidebar-list-item' onClick={handelLogout}>
                    <a href="#">
-                    <BsBoxArrowRight className='icon' onClick={handelLogout}/> Logout
+                    <BsBoxArrowRight className='icon'/> Logout
                     </a>
             </li>
 

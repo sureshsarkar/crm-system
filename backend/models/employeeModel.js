@@ -35,7 +35,7 @@ const employeeSchema = new mongoose.Schema({
   role: {
     type: Number,
     required: true,
-    enum: [1,2,3,4],  // Assuming   1 Employee, 2 Project Manager, 3 SEO Manager, 4 Development Manager
+    enum: [1,2,3,4,5],  // Assuming   1 Employee, 2 Project Manager, 3 SEO Manager, 4 Development Manager, 5 Admin
   },
   employeeid: {
     type: String,

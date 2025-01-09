@@ -26,10 +26,19 @@ import ProtectedRoute from "./utills/ProtectedRoute";
 
 function App() {
   const [openSidebarToggle, setOpenSidebarToggle] = useState(false);
-
+  const [roleAuth, setRoleAuth] = useState(null);
   const OpenSidebar = () => {
     setOpenSidebarToggle(!openSidebarToggle);
   };
+
+
+  const getRole = ()=>{
+    const logedInUser = localStorage.getItem('user');
+    if(logedInUser){
+        // const role = JSON.parse(logedInUser).role;
+        setRoleAuth(JSON.parse(logedInUser).role);
+    }
+}
 
   return (
     <Router>
@@ -38,22 +47,24 @@ function App() {
         <Sidebar
           openSidebarToggle={openSidebarToggle}
           OpenSidebar={OpenSidebar}
+          getRole={getRole}
+          roleAuth ={roleAuth}
         />
         <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route exact path="/login" element={<Login />} />
+          <Route exact  path="/dashboard" element={<ProtectedRoute><Dashboard getRole={getRole} roleAuth ={roleAuth} /></ProtectedRoute>} />
 
-          <Route path="/project" element={<ProtectedRoute><ManageProject /></ProtectedRoute>} />
-          <Route path="/project/add" element={<ProtectedRoute><AddProject /></ProtectedRoute>} />
-          <Route path="/project/edit/:id" element={<ProtectedRoute><EditProject /></ProtectedRoute>} />
+          <Route exact  path="/project" element={<ProtectedRoute><ManageProject getRole={getRole} roleAuth ={roleAuth}/></ProtectedRoute>} />
+          <Route exact  path="/project/add" element={<ProtectedRoute><AddProject /></ProtectedRoute>} />
+          <Route exact  path="/project/edit/:id" element={<ProtectedRoute><EditProject /></ProtectedRoute>} />
 
-          <Route path="/employee" element={<ProtectedRoute><ManageEmployee /></ProtectedRoute>} />
-          <Route path="/employee/add" element={<ProtectedRoute><AddEmployee /></ProtectedRoute>} />
-          <Route path="/employee/edit/:id" element={<ProtectedRoute><EditEmployee /></ProtectedRoute>} />
+          <Route exact  path="/employee" element={<ProtectedRoute><ManageEmployee getRole={getRole} roleAuth ={roleAuth}/></ProtectedRoute>} />
+          <Route exact  path="/employee/add" element={<ProtectedRoute><AddEmployee /></ProtectedRoute>} />
+          <Route exact  path="/employee/edit/:id" element={<ProtectedRoute><EditEmployee /></ProtectedRoute>} />
 
-          <Route path="/task" element={<ProtectedRoute><ManageTask /></ProtectedRoute>} />
-          <Route path="/task/add" element={<ProtectedRoute><AddTask /></ProtectedRoute>} />
-          <Route path="/task/edit/:id" element={<ProtectedRoute><EditTask /></ProtectedRoute>} />
+          <Route exact  path="/task" element={<ProtectedRoute><ManageTask getRole={getRole} roleAuth ={roleAuth}/></ProtectedRoute>} />
+          <Route exact  path="/task/add" element={<ProtectedRoute><AddTask /></ProtectedRoute>} />
+          <Route exact  path="/task/edit/:id" element={<ProtectedRoute><EditTask /></ProtectedRoute>} />
         </Routes>
       </div>
     </Router>

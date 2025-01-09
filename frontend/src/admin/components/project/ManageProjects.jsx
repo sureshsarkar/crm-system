@@ -7,7 +7,13 @@ import { IoIosPersonAdd } from "react-icons/io";
 import toast  from 'react-hot-toast';
 import { format } from 'date-fns';
 
-const ManageProject = () => {
+const ManageProject = ({getRole,roleAuth}) => {
+
+  useEffect(  () =>{
+    getRole();
+},[roleAuth])
+
+
   const [projectData, setProjectData] = useState([]);
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -82,10 +88,15 @@ const handleDeleteProject = async (id) => {
     { name: "Name", selector: (row) => row.projectname, sortable: true },
     { name: "Status", selector: (row) => (row.status==1 ? "Active" : "Inactive"), sortable: true },
     { name: "Created", selector: (row) => row.createdAt, sortable: true },
-    {
-      name: "Action",
-      cell: (row) => (
-        <div className="d-flex">
+  ];
+
+
+   // Conditionally add the "Action" column if roleAuth is 5
+    if (roleAuth === 5) {
+      columns.push({
+        name: "Action",
+        cell: (row) => (
+          <div className="d-flex">
           <a href={`/project/edit/${row.id}`}>
             <button className="btn btn-primary m-1" title="Edit">
               <FaEdit />
@@ -100,19 +111,23 @@ const handleDeleteProject = async (id) => {
            {loading ? "..." : <TiArchive />}
           </button>
         </div>
-      ),
-    },
-  ];
+        ),
+      });
+    }
+  
+
 
   return (
     <div className="main-container">
       <div className="d-flex justify-content-between">
         <h2 className="text-success text-start p-2">Project Data Table</h2>
+        { roleAuth===5 ? (
         <a href="/project/add" className="p-2">
           <button className="btn btn-primary">
             <IoIosPersonAdd /> Add
           </button>
         </a>
+        ):null}
       </div>
 
       <div>

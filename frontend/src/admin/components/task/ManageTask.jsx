@@ -10,7 +10,11 @@ import { format } from 'date-fns';
 
 
 
-const ManageTask = () => {
+const ManageTask = ({getRole,roleAuth}) => {
+
+    useEffect(  () =>{
+        getRole();
+    },[roleAuth])
 
   const [records, setRecords] = useState([]);
   const [taskData, setTaskData] = useState([]);
@@ -117,42 +121,54 @@ const ManageTask = () => {
       name: "Timer",
       cell: (row) => (
         <div className="timerButton" data-id={row.id}>
-          {timerRunning  && row.id==taskId? 
-          <button className="btn stoptimerCLS" data-bs-toggle="modal" data-bs-target="#staticBackdrop" title="Stop Timer">
-            <img src="./icon-clock.gif" alt="" />
-          </button>
-           :
-           <button className="btn" title="Start Timer" onClick={handelStartTimer}>
-             <MdOutlineWatchLater />
-          </button>
-           }
-          </div>
+          {timerRunning && row.id === taskId ? (
+            <button
+              className="btn stoptimerCLS"
+              data-bs-toggle="modal"
+              data-bs-target="#staticBackdrop"
+              title="Stop Timer"
+            >
+              <img src="./icon-clock.gif" alt="" />
+            </button>
+          ) : (
+            <button className="btn" title="Start Timer" onClick={handelStartTimer}>
+              <MdOutlineWatchLater />
+            </button>
+          )}
+        </div>
       ),
     },
-    { name: "Status", 
-      cell:(row)=>(
-        <select className="form-select form-controle" name="status" onChange={handleChange}  value={row.status} required>
+    {
+      name: "Status",
+      cell: (row) => (
+        <select
+          className="form-select form-controle"
+          name="status"
+          onChange={handleChange}
+          value={row.status}
+          required
+        >
           <option value="In Process">In Process</option>
           <option value="Not Started">Not Started</option>
           <option value="Completed">Completed</option>
           <option value="On Hold">On Hold</option>
         </select>
-      )
-    },
-    { 
-      name: "Title", 
-      selector: (row) => row.title, 
-      sortable: true,
-      cell: (row) => (
-        <div title={row.title} className="titleCell">
-          {row.title}
-        </div>
       ),
+    },
+    {
+      name: "Title",
+      selector: (row) => row.title,
+      sortable: true,
+      cell: (row) => <div title={row.title} className="titleCell">{row.title}</div>,
     },
     { name: "Project Name", selector: (row) => row.projectname, sortable: true },
     { name: "Assign", selector: (row) => row.assignto, sortable: true },
     { name: "Created", selector: (row) => row.createdAt, sortable: true },
-    {
+  ];
+  
+  // Conditionally add the "Action" column if roleAuth is 5
+  if (roleAuth === 5) {
+    columns.push({
       name: "Action",
       cell: (row) => (
         <div className="d-flex">
@@ -170,8 +186,8 @@ const ManageTask = () => {
           </button>
         </div>
       ),
-    },
-  ];
+    });
+  }
 
 
 
@@ -315,11 +331,13 @@ const closeModel = (e)=>{
     <div className="main-container">
       <div className="d-flex justify-content-between">
         <h2 className="text-success text-start p-2">Task Data Table</h2>
+        {roleAuth !==1 ?(
         <a href="/task/add" className="p-2">
           <button className="btn btn-primary">
             <IoIosPersonAdd /> Add
           </button>
         </a>
+        ):null}
       </div>
       <div>
         <div className="text-end">

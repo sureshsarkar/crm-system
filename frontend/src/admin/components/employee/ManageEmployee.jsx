@@ -7,7 +7,7 @@ import { IoIosPersonAdd } from "react-icons/io";
 import toast  from 'react-hot-toast';
 import { format } from 'date-fns';
 
-const ManageEmployee = () => {
+const ManageEmployee = ({getRole,roleAuth}) => {
   const [employeeData, setEmployeeData] = useState([]);
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -81,9 +81,15 @@ const handleDeleteEmployee = async (id) => {
   const columns = [
     // { name: "ID", selector: (row) => row.id, sortable: true },
     { name: "Name", selector: (row) => row.name, sortable: true },
-    { name: "Email", selector: (row) => row.email, sortable: true },
+    { name: "Email", selector: (row) => row.email, sortable: true,
+      cell: (row) => (
+        <div title={row.email} className="emailCell">
+          {row.email}
+        </div>
+      ),
+     },
     { name: "Mobile", selector: (row) => row.mobile, sortable: true },
-    { name: "Role", selector: (row) => row.role==1? "Employee": row.role==2 ? "Project Manager"  : row.role==3 ? "SEO Manager" : "Development Manager", sortable: true },
+    { name: "Role", selector: (row) => row.role==1? "Employee": row.role==2 ? "Project Manager"  : row.role==3 ? "SEO Manager" : row.role==4 ? "Development Manager" : "Admin", sortable: true },
     { name: "Status", selector: (row) => (row.status==1 ? "Active" : "Inactive"), sortable: true },
     { name: "Created", selector: (row) => row.createdAt, sortable: true },
     {
@@ -112,11 +118,13 @@ const handleDeleteEmployee = async (id) => {
     <div className="main-container">
       <div className="d-flex justify-content-between">
         <h2 className="text-success text-start p-2">Employee Data Table</h2>
+        {roleAuth ===5 ?(
         <a href="/employee/add" className="p-2">
           <button className="btn btn-primary">
             <IoIosPersonAdd /> Add
           </button>
         </a>
+        ):null}
       </div>
 
       <div>

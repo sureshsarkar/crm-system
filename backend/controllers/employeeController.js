@@ -171,6 +171,7 @@ exports.editEmployeeController = async (req, res) => {
         // Save new employee data
         const newEmployee = {
             fullname,
+            email,
             gender,
             role,
             status,
@@ -212,11 +213,11 @@ exports.loginController = async (req, res) => {
         }
 
         // get user
-        const user = await employeeModel.findOne({ email });
+        const user = await employeeModel.findOne({ email, status: 1  });
 
         if (!user) {
-            return res.status(400).send({
-                message: 'Email does not exist',
+            return res.status(201).send({
+                message: 'Unauthorized Login',
                 success: false
             });
         }

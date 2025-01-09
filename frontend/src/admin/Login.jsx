@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { setLoginDataInLocalStorage } from "../utills/CustomFunctions";
 
 const Login = () => {
   const [inputs, setInputs] = useState({
@@ -10,6 +11,14 @@ const Login = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem("user");
+    if (isLoggedIn) {
+      navigate("/dashboard");  // Redirect to dashboard if logged in
+    }
+  }, [navigate]);
 
   // Handle input changes
   const handleChange = (e) => {
@@ -25,18 +34,13 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-
       const { data } = await axios.post("/api/auth/login", inputs);
 
       if (data.success) {
-          toast.success("Login Successful!");
-          const now = new Date();
-          const item = {
-            value: data.token,
-            expiry: now.getTime() + 15 * 24 * 60 * 60 * 1000,  // Expiry time in milliseconds
-          };
-          localStorage.setItem("user", JSON.stringify(item));
-          navigate("/dashboard");
+        toast.success("Login Successful!");
+        const propItem = { token: data.token,role:data.role };
+        setLoginDataInLocalStorage(propItem);  // Store token in localStorage
+        navigate("/dashboard");  // Redirect to dashboard after login
       } else {
         toast.error(data.message || "Invalid credentials");
       }
@@ -46,7 +50,7 @@ const Login = () => {
   };
 
   return (
-    <main className='main-container'>
+    <main className="main-container">
       <h2 className="text-center mb-4">Login</h2>
       <form onSubmit={handleSubmit} className="w-50 mx-auto card p-4">
         <div className="mb-3">
@@ -61,7 +65,7 @@ const Login = () => {
             placeholder="Enter your email"
           />
         </div>
-        
+
         <div className="mb-3">
           <label>Password</label>
           <div className="input-group">

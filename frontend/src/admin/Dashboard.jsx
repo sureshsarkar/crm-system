@@ -1,4 +1,4 @@
-import React from 'react'
+import React,{useEffect} from 'react'
 import 
 { BsFillArchiveFill, BsFillGrid3X3GapFill, BsPeopleFill, BsFillBellFill}
  from 'react-icons/bs'
@@ -6,8 +6,12 @@ import
  { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } 
  from 'recharts';
 
-function Dashboard() {
+function Dashboard({getRole,roleAuth}) {
 
+     useEffect(  () =>{
+          getRole();
+      },[roleAuth])
+      
     const data = [
         {
           name: 'Page A',
@@ -57,12 +61,13 @@ function Dashboard() {
   return (
     <main className='main-container'>
         <div className='main-title'>
-            <h3>DASHBOARD</h3>
+            <h3 className='text-dark'>DASHBOARD</h3>
         </div>
 
         <div className='main-cards'>
+          {roleAuth === 5 ?(
             <div className='card'>
-              <a href="/employees">
+              <a href="/employee">
                 <div className='card-inner'>
                     <h3>Employees</h3>
                     <BsPeopleFill className='card_icon'/>
@@ -70,8 +75,10 @@ function Dashboard() {
                 <h1>300</h1>
                 </a>
             </div>
+          ):null
+          }
             <div className='card'>
-            <a href="/tasks">
+            <a href="/task">
                 <div className='card-inner'>
                     <h3>Tasks</h3>
                     <BsFillGrid3X3GapFill className='card_icon'/>
