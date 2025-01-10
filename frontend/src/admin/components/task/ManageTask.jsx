@@ -1,20 +1,20 @@
-import React, { useState,useEffect,useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import DataTable from "react-data-table-component";
 import { TiArchive } from "react-icons/ti";
-import { FaEdit } from "react-icons/fa";
+import { FaEdit,FaEye} from "react-icons/fa";
 import { IoIosPersonAdd } from "react-icons/io";
-import { MdOutlineWatchLater,MdWatchLater } from "react-icons/md";
-import toast  from 'react-hot-toast';
+import { MdOutlineWatchLater, MdWatchLater } from "react-icons/md";
+import toast from 'react-hot-toast';
 import { format } from 'date-fns';
 
 
 
-const ManageTask = ({getRole,roleAuth}) => {
+const ManageTask = ({ getRole, roleAuth }) => {
 
-    useEffect(  () =>{
-        getRole();
-    },[roleAuth])
+  useEffect(() => {
+    getRole();
+  }, [roleAuth])
 
   const [records, setRecords] = useState([]);
   const [taskData, setTaskData] = useState([]);
@@ -25,20 +25,20 @@ const ManageTask = ({getRole,roleAuth}) => {
   const [taskId, setTastId] = useState(null);
   const closeButtonRef = useRef(null);
 
-    const [inputs, setInputs] = useState({
-      starttime: "",
-      timerid: "",
-      comment: "",
-      totalduration: ""
-    });
+  const [inputs, setInputs] = useState({
+    starttime: "",
+    timerid: "",
+    comment: "",
+    totalduration: ""
+  });
 
-   // Fetch Projects
-   const getProjects = async () => {
+  // Fetch Projects
+  const getProjects = async () => {
     try {
       const { data } = await axios.get("/api/project/get-all");
       if (data.success) {
         // console.log(data);
-        
+
         setProjects(data.project);  // Store projects in state
       }
     } catch (error) {
@@ -46,8 +46,8 @@ const ManageTask = ({getRole,roleAuth}) => {
     }
   };
 
-   // Fetch Projects
-   const getEmployees = async () => {
+  // Fetch Projects
+  const getEmployees = async () => {
     try {
       const { data } = await axios.get("/api/auth/employee");
       if (data.success) {
@@ -63,13 +63,13 @@ const ManageTask = ({getRole,roleAuth}) => {
   const getTasks = async () => {
     try {
       const { data } = await axios.get("/api/task/get-all");
-      
+
       if (data.success) {
         const formattedData = data.tasks.map((task, i) => {
-          const projectName =  projects.find(p => p._id === task.projectname)?.projectname || "Unknown";
-          const assigntoName =  employees.find(p => p._id === task.assignto)?.fullname || "Unknown";
+          const projectName = projects.find(p => p._id === task.projectname)?.projectname || "Unknown";
+          const assigntoName = employees.find(p => p._id === task.assignto)?.fullname || "Unknown";
           return {
-            id:task._id,
+            id: task._id,
             sn: i + 1,
             title: task.title,
             projectname: projectName,
@@ -87,10 +87,10 @@ const ManageTask = ({getRole,roleAuth}) => {
   };
 
   // get task timer status start 
-  const getTimerStatus =  ()=>{
-    const timerStatus  = JSON.parse(localStorage.getItem('timer'));
+  const getTimerStatus = () => {
+    const timerStatus = JSON.parse(localStorage.getItem('timer'));
 
-    if(timerStatus?.starttimer){
+    if (timerStatus?.starttimer) {
       setTimerRunning(true)
       setTastId(timerStatus.taskid)
     }
@@ -100,7 +100,7 @@ const ManageTask = ({getRole,roleAuth}) => {
 
 
   useEffect(() => {
-     getTimerStatus();
+    getTimerStatus();
   }, []);
 
   // Fetch data on component mount
@@ -165,13 +165,22 @@ const ManageTask = ({getRole,roleAuth}) => {
     { name: "Assign", selector: (row) => row.assignto, sortable: true },
     { name: "Created", selector: (row) => row.createdAt, sortable: true },
   ];
-  
+
   // Conditionally add the "Action" column if roleAuth is 5
-  if (roleAuth === 5) {
+  if (roleAuth === 2 || roleAuth === 3 || roleAuth === 4 || roleAuth === 5) {
     columns.push({
       name: "Action",
       cell: (row) => (
         <div className="d-flex">
+          {
+            roleAuth === 5 ? (
+              <a href={`/task/view/${row.id}`}>
+                <button className="btn btn-primary m-1" title="View">
+                  <FaEye />
+                </button>
+              </a>
+            ) : null
+          }
           <a href={`/task/edit/${row.id}`}>
             <button className="btn btn-primary m-1" title="Edit">
               <FaEdit />
@@ -192,134 +201,138 @@ const ManageTask = ({getRole,roleAuth}) => {
 
 
 
-   // Filter task function
-   const handelFilter = (event) => {
+  // Filter task function
+  const handelFilter = (event) => {
     const value = event.target.value.toLowerCase();
     const filteredData = taskData.filter((row) =>
-      (String(row.title).toLowerCase().includes(value) || 
-       String(row.projectname).toLowerCase().includes(value) ||
-       String(row.status).toLowerCase().includes(value) ||
-       String(row.createdAt).toLowerCase().includes(value)
-      )
+    (String(row.title).toLowerCase().includes(value) ||
+      String(row.projectname).toLowerCase().includes(value) ||
+      String(row.status).toLowerCase().includes(value) ||
+      String(row.createdAt).toLowerCase().includes(value)
+    )
     );
     setRecords(filteredData);
   };
 
 
 
-   // Delete task function
+  // Delete task function
 
-const handleDeleteEmployee = async (id) => {
-  if (!window.confirm("Are you sure you want to delete this task?")) return;
-  
-  setLoading(true);
-  try {
-    const { data } = await axios.delete(`/api/task/delete/${id}`);
-    if (data.success) {
-      toast.success(data.message);
-      const updatedTask = taskData.filter(emp => emp.id !== id);
-      setTaskData(updatedTask);
-      setRecords(updatedTask);
-    } else {
-      toast.error(data.message);
+  const handleDeleteEmployee = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this task?")) return;
+
+    setLoading(true);
+    try {
+      const { data } = await axios.delete(`/api/task/delete/${id}`);
+      if (data.success) {
+        toast.success(data.message);
+        const updatedTask = taskData.filter(emp => emp.id !== id);
+        setTaskData(updatedTask);
+        setRecords(updatedTask);
+      } else {
+        toast.error(data.message);
+      }
+
+    } catch (error) {
+      toast.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+  const handelStartTimer = async (event) => {
+    const parentDiv = event.target.closest('.timerButton');
+    const taskId = parentDiv ? parentDiv.getAttribute('data-id') : null;
+    // const assignerId = parentDiv ? parentDiv.getAttribute('data-assignto') : null;
+
+    if (timerRunning) {
+      toast.error("First of all stop other task");
+      return false
     }
 
-  } catch (error) {
-    toast.error(error);
-  } finally {
-    setLoading(false);
-  }
-};
+    try {
+      const { data } = await axios.get(`/api/task/get-by-id/${taskId}`);
 
+      if (data?.task) {
+        const taskRef = data?.task;
+        await startTimer(taskRef);
+        getTimerStatus();
 
-const handelStartTimer = async (event)=>{
-  const parentDiv = event.target.closest('.timerButton');
-  const taskId = parentDiv ? parentDiv.getAttribute('data-id') : null;
-  // const assignerId = parentDiv ? parentDiv.getAttribute('data-assignto') : null;
+      }
 
-  if(timerRunning){
-    toast.error("First of all stop other task");
-    return false
-  }
-
-  try {
-    const {data} = await axios.get(`/api/task/get-by-id/${taskId}`);
-
-    if(data?.task){
-      const taskRef = data?.task;
-    await startTimer(taskRef);
-          getTimerStatus();
+    } catch (error) {
+      console.log(error);
 
     }
-    
-  } catch (error) {
-    console.log(error);
-    
   }
-}
 
-const startTimer = async (taskRef)=>{
+  const startTimer = async (taskRef) => {
     const taskdataSchema = {
-      taskid:taskRef._id,
-      assignid:taskRef.assignto,
+      taskid: taskRef._id,
+      assignid: taskRef.assignto,
     }
-    const {data} = await axios.post("/api/timer/add",taskdataSchema);
-    if(data?.success){
-        const starttimer = data?.timerdata.timer.isrunning;
-        const taskid = data?.timerdata.taskid;
-        const timerid = data?.timerdata._id;
-        toast.success("Timer Started!");
-        const now = new Date();
-        const item = {
-          starttimer: starttimer,
-          taskid:taskid,
-          timerid:timerid,
-          started:now.getTime(),
-          timerexpiry: now.getTime() + 15 * 24 * 60 * 60 * 1000,  // Expiry time in milliseconds
-        };
-        localStorage.setItem("timer", JSON.stringify(item));
-        // navigate("/dashboard");
+    const { data } = await axios.post("/api/timer/add", taskdataSchema);
+    if (data?.success) {
+      const starttimer = data?.timerdata.timer.isrunning;
+      const taskid = data?.timerdata.taskid;
+      const timerid = data?.timerdata._id;
+      toast.success("Timer Started!");
+      const now = new Date();
+      const item = {
+        starttimer: starttimer,
+        taskid: taskid,
+        timerid: timerid,
+        started:  Math.floor(Date.now() / 1000),
+        timerexpiry: now.getTime() + 15 * 24 * 60 * 60 * 1000,  // Expiry time in milliseconds
+      };
+      localStorage.setItem("timer", JSON.stringify(item));
+      // navigate("/dashboard");
     } else {
       toast.error(data.message || "Invalid credentials");
     }
-}
+  }
 
-const handelStopTimer = async()=>{
-  try {
+  const handelStopTimer = async () => {
+    try {
 
-    if(inputs.comment==''){
-      toast.error("Add a comment");
-      return false
-    }
-    const now = new Date();
-    const timerStatus  = JSON.parse(localStorage.getItem('timer'));
-      if(timerStatus.starttimer){
+      if (inputs.comment == '') {
+        toast.error("Add a comment");
+        return false
+      }
+      const now = new Date();
+      const timerStatus = JSON.parse(localStorage.getItem('timer'));
+      if (timerStatus.starttimer) {
         inputs.starttime = new Date(timerStatus.started).toISOString();
         inputs.timerid = timerStatus.timerid;
-        inputs.totalduration =now.getTime() - timerStatus.started;
-        const {data} = await axios.post("/api/timer/edit",inputs);
+        inputs.totalduration =  Math.floor(Date.now() / 1000) - timerStatus.started;
+
+        // console.log(inputs);
+        // return false;
         
-        if(data.success){
+        const { data } = await axios.post("/api/timer/edit", inputs);
+
+        if (data.success) {
 
           localStorage.removeItem("timer");
 
           setTimerRunning(false)
-           // Auto click the close button
+          // Auto click the close button
           if (closeButtonRef.current) {
             closeButtonRef.current.click();
           }
           toast.success(data.message);
         }
       }
-  } catch (error) {
-    console.log(error);
+    } catch (error) {
+      console.log(error);
+    }
   }
-}
 
-const closeModel = (e)=>{
-  const modal = bootstrap.Modal.getInstance(e.target.closest('.modal'));
-  modal.hide();
-}
+  const closeModel = (e) => {
+    const modal = bootstrap.Modal.getInstance(e.target.closest('.modal'));
+    modal.hide();
+  }
   const handleChange = (e) => {
     setInputs({
       ...inputs,
@@ -331,13 +344,13 @@ const closeModel = (e)=>{
     <div className="main-container">
       <div className="d-flex justify-content-between">
         <h2 className="text-success text-start p-2">Task Data Table</h2>
-        {roleAuth !==1 ?(
-        <a href="/task/add" className="p-2">
-          <button className="btn btn-primary">
-            <IoIosPersonAdd /> Add
-          </button>
-        </a>
-        ):null}
+        {roleAuth !== 1 ? (
+          <a href="/task/add" className="p-2">
+            <button className="btn btn-primary">
+              <IoIosPersonAdd /> Add
+            </button>
+          </a>
+        ) : null}
       </div>
       <div>
         <div className="text-end">
@@ -348,24 +361,24 @@ const closeModel = (e)=>{
           />
         </div>
 
-          <div className="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false"  aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div className="modal-dialog">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h1 className="modal-title fs-5 text-dark" id="staticBackdropLabel">Add a comment</h1>
-                  <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div className="modal-body">
-                <textarea name="comment" value={inputs.comment} onChange={handleChange} placeholder="Add a comment"/>
+        <div className="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h1 className="modal-title fs-5 text-dark" id="staticBackdropLabel">Add a comment</h1>
+                <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div className="modal-body">
+                <textarea name="comment" value={inputs.comment} onChange={handleChange} placeholder="Add a comment" />
 
-                </div>
-                <div className="modal-footer">
-                  <button type="button" className="btn btn-secondary" data-bs-dismiss="modal" ref={closeButtonRef}>Close</button>
-                  <button type="button" className="btn btn-primary" onClick={handelStopTimer}>Submit</button>
-                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal" ref={closeButtonRef}>Close</button>
+                <button type="button" className="btn btn-primary" onClick={handelStopTimer}>Submit</button>
               </div>
             </div>
           </div>
+        </div>
         {/* model end  */}
         <DataTable
           columns={columns}

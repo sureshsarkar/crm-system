@@ -251,3 +251,24 @@ label{
 .stoptimerCLS img{
   width: 20px;
 }
+ul>a{
+  text-decoration: none;
+  color: #9e9ea4;
+}
+.bg-inverse-success {
+  background-color: rgba(15, 183, 107, .12) !important;
+  color: #26af48 !important;
+}
+.bg-inverse-warning {
+  background-color: rgba(255, 152, 0, .12) !important;
+  color: #f39c12 !important;
+}
+.comenttextstyle{
+  color: #000000;
+}
+span{
+  font-size: 10px !important;
+}
+label b{
+  font-size: 13px;
+}

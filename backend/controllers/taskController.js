@@ -53,8 +53,40 @@ exports.getById = async (req,res) =>{
             })
         }
 
-        const taskData = await taskModel.findById(id,'_id assignto');
+        const taskData = await taskModel.findById(id);
 
+        if(taskData){
+            return res.status(200).send({
+                message:"Task Data found",
+                success:true,
+                task:taskData
+            })
+        }
+
+    } catch (error) {
+        return res.status(201).send({
+            message:'Server Error',
+            success:false,
+            error:error.message || error
+        })
+    }
+}
+// function to get data by Id end
+
+
+// function to get data by Id start 
+exports.getByJoin = async (req,res) =>{
+    try {
+        const id = req.params.id;
+
+        if(!id){
+            return res.status(201).send({
+                message:'No id found',
+                success:false
+            })
+        }
+        const taskData = await taskModel.findById(id).populate('assignto createdby follower projectname').exec();
+    
         if(taskData){
             return res.status(200).send({
                 message:"Task Data found",

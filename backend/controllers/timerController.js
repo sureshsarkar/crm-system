@@ -41,8 +41,15 @@ exports.addTimer = async(req,res)=>{
     }
 }
 
+exports.getById = async (req,res)=>{
+    return res.status(201).send({
+        message:'No id found',
+        success:false
+    })
+}
+
 // function to get data by Id start 
-exports.getById = async (req,res) =>{
+exports.getByTaskId = async (req,res) =>{
     try {
         const id = req.params.id;
 
@@ -53,13 +60,13 @@ exports.getById = async (req,res) =>{
             })
         }
 
-        const taskData = await timerModel.findById(id,'_id assignto');
+        const timerData = await timerModel.find({ taskid: id });
 
-        if(taskData){
+        if(timerData){
             return res.status(200).send({
-                message:"Task Data found",
+                message:"Timer Data found",
                 success:true,
-                task:taskData
+                timer:timerData
             })
         }
 

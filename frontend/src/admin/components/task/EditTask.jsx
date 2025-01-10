@@ -40,7 +40,6 @@ const EditTask = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
  
-
     const formData = {
       title: inputs.title,
       startdate: inputs.startdate,
@@ -54,8 +53,6 @@ const EditTask = () => {
     };
 // console.log(selectedFollowerEmployee);
 // return false
-
-  
 
     try {
       const { data } = await axios.put(`/api/task/edit-task/${id}`, formData);

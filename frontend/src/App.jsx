@@ -23,6 +23,7 @@ import AddProject from "./admin/components/project/AddProject";
 import EditProject from "./admin/components/project/EditProject";
 import Login from "./admin/Login";
 import ProtectedRoute from "./utills/ProtectedRoute";
+import ViewTask from "./admin/components/task/ViewTask";
 
 function App() {
   const [openSidebarToggle, setOpenSidebarToggle] = useState(false);
@@ -65,6 +66,7 @@ function App() {
           <Route exact  path="/task" element={<ProtectedRoute><ManageTask getRole={getRole} roleAuth ={roleAuth}/></ProtectedRoute>} />
           <Route exact  path="/task/add" element={<ProtectedRoute><AddTask /></ProtectedRoute>} />
           <Route exact  path="/task/edit/:id" element={<ProtectedRoute><EditTask /></ProtectedRoute>} />
+          <Route exact  path="/task/view/:id" element={<ProtectedRoute><ViewTask /></ProtectedRoute>} />
         </Routes>
       </div>
     </Router>

@@ -2,11 +2,13 @@ const mongoose = require('mongoose');
 
 const timerSchema = new mongoose.Schema({
     taskid: {
-        type: String,  // Fix: 'Type' -> 'type'
-        required: true  // Fix: 'require' -> 'required'
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'tasks',
+          required: true  // Fix: 'require' -> 'required'
     },
     assignid: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+          ref: 'employees',
         required: true
     },
     comment: {
