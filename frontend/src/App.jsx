@@ -52,6 +52,7 @@ function App() {
           roleAuth ={roleAuth}
         />
         <Routes>
+          <Route exact path="/" element={<Login />} />
           <Route exact path="/login" element={<Login />} />
           <Route exact  path="/dashboard" element={<ProtectedRoute><Dashboard getRole={getRole} roleAuth ={roleAuth} /></ProtectedRoute>} />
 
