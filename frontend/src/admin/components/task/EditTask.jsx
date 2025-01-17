@@ -29,6 +29,55 @@ const EditTask = () => {
     status: "",
   });
 
+
+  
+  useEffect(() => {
+    const fetchTaskDetails = async () => {
+      try {
+        const { data } = await axios.put(`/api/task/edit-task/${id}`);
+        console.log(data.taskData);
+        
+        if (data.taskData) {
+          setInputs({
+            title: data.taskData.title,
+            startdate: dayjs(data.taskData.startdate).format('YYYY-MM-DD'),
+            enddate: dayjs(data.taskData.enddate).format('YYYY-MM-DD'),
+            tag: data.taskData.tag,
+            description: data.taskData.description,
+            status: data.taskData.status
+          });
+          setInputs((prev) => ({
+            ...prev,
+            assignto: data.taskData.assignto,
+            follower: data.taskData.follower,
+            projectname: data.taskData.projectname,
+          }));
+          //  setSelectedEmployee(employeeState.filter((p) => data.taskData.assignto.includes(p._id)).map((p) => ({ value: p._id, label: p.fullname }))[0]);
+          // await getProjectsByIds(selectedEmployee.value);
+          // setSelectedFollowerEmployee(employeeState.filter((p) => data.taskData.follower.includes(p._id)).map((p) => ({ value: p._id, label: p.fullname }))[0]);
+          // setSelectedProjects(projectState.filter((p) => data.taskData.projectname.includes(p._id)).map((p) => ({ value: p._id, label: p.projectname }))[0]);
+          // return false
+        }
+      } catch (error) {
+        toast.error("Failed to fetch task details");
+      }
+    };
+  
+    fetchTaskDetails();
+
+  }, [id]);
+
+ useEffect(() => {
+    if (employeeState.length > 0 && inputs.assignto) {
+           setSelectedEmployee(employeeState.filter((p) => inputs.assignto.includes(p._id)).map((p) => ({ value: p._id, label: p.fullname }))[0]);
+           getProjectsByIds(inputs.assignto);
+           setSelectedProjects(projectState.filter((p) => inputs.projectname.includes(p._id)).map((p) => ({ value: p._id, label: p.projectname }))[0]);
+          setSelectedFollowerEmployee(employeeState.filter((p) => inputs.follower.includes(p._id)).map((p) => ({ value: p._id, label: p.fullname }))[0]);
+          // return false
+    }
+  }, [inputs.assignto, inputs.follower, inputs.projectname]);
+
+
   const handleChange = (e) => {
     setInputs({
       ...inputs,
@@ -51,8 +100,6 @@ const EditTask = () => {
       description: inputs.description,
       status: inputs.status,
     };
-// console.log(selectedFollowerEmployee);
-// return false
 
     try {
       const { data } = await axios.put(`/api/task/edit-task/${id}`, formData);
@@ -93,11 +140,6 @@ const EditTask = () => {
       }
       // console.log(resp.data.projects);
 
-
-      // const { data } = await axios.get("/api/project/get-all");
-      // if (data?.success) {
-      //   setProjectState(data?.project);
-      // }
     } catch (error) {
       console.error(error);
     }
@@ -109,40 +151,6 @@ const EditTask = () => {
     // getProjects();
   }, []);
   
-  useEffect(() => {
-    const fetchTaskDetails = async () => {
-      try {
-        const { data } = await axios.put(`/api/task/edit-task/${id}`);
-        
-        if (data.taskData) {
-          setInputs({
-            title: data.taskData.title,
-            startdate: dayjs(data.taskData.startdate).format('YYYY-MM-DD'),
-            enddate: dayjs(data.taskData.enddate).format('YYYY-MM-DD'),
-            tag: data.taskData.tag,
-            description: data.taskData.description,
-            status: data.taskData.status
-          });
-
-           setSelectedEmployee(employeeState.filter((p) => data.taskData.assignto.includes(p._id)).map((p) => ({ value: p._id, label: p.fullname }))[0]);
-          await getProjectsByIds(selectedEmployee.value);
-          // console.log(selectedEmployee.value);
-          setSelectedFollowerEmployee(employeeState.filter((p) => data.taskData.follower.includes(p._id)).map((p) => ({ value: p._id, label: p.fullname }))[0]);
-          setSelectedProjects(projectState.filter((p) => data.taskData.projectname.includes(p._id)).map((p) => ({ value: p._id, label: p.projectname }))[0]);
-          return false
-        }
-      } catch (error) {
-        toast.error("Failed to fetch task details");
-      }
-    };
-  
-    fetchTaskDetails();
-
-// console.log(selectedFollowerEmployee);
-
-  }, []);
-
-
 
   // Employee options for select
   const options = employeeState.map((employee) => ({

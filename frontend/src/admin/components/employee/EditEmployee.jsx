@@ -1,18 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { IoIosArrowRoundBack } from "react-icons/io";
-import axios from 'axios';
+import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
-import toast from 'react-hot-toast';
+import toast from "react-hot-toast";
 import Select from "react-select";
 
 const EditEmployee = () => {
   const [projectState, setProjectState] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [selectedProjects, setSelectedProjects] = useState(null);
   const navigate = useNavigate();
-  const { id } = useParams(); 
+  const { id } = useParams();
 
-  
   const [inputs, setInputs] = useState({
     fullname: "",
     email: "",
@@ -20,93 +18,12 @@ const EditEmployee = () => {
     mobile: "",
     employeeid: "",
     role: "",
-    projects: "",
+    projects: [],
     gender: "",
     status: "",
   });
 
-  
-  const options = projectState.map((project) => ({
-    value: project._id,
-    label: project.projectname,
-  }));
-  // Get employee details when the component is mounted
-  useEffect(() => {
-    const fetchEmployee = async () => {
-      try {
-        const { data } = await axios.put(`/api/auth/edit-employee/${id}`); // Assuming your backend endpoint is '/api/auth/employee/:id'
-        console.log(data);
-        
-        if (data.success) {
-          setInputs({
-            employeeid: data.employee.employeeid,
-            fullname: data.employee.fullname,
-            email: data.employee.email,
-            mobile: data.employee.mobile,
-            role: data.employee.role,
-            projects: data.employee.projects,
-            gender: data.employee.gender,
-            status: data.employee.status,
-          });
-
-          // Initialize selected projects based on the employee's current projects
-          const selected = await  data.employee.projects.map((projectId) => {
-            return options.find((project) => project.value === projectId);
-          });
-          setSelectedProjects(selected);
-          
-        } else {
-          console.error(data.message);
-        }
-      } catch (error) {
-        console.error("Error fetching employee details:", error);
-      }
-    };
-
-    fetchEmployee();
-  }, [id]); // Run once when the id changes
-
-
-  const handleChange = (e) => {
-    setInputs({
-      ...inputs,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  // Handle change event for the select element
-  const handleChangeProject = (selected) => {
-    setSelectedProjects(selected);
-  };
-
-
-
-  // Submit function
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const formData = {
-      fullname: inputs.fullname,
-      email: inputs.email,
-      mobile: inputs.mobile,
-      employeeid: inputs.employeeid,
-      role: inputs.role,
-      gender: inputs.gender,
-      status: inputs.status,
-      projects: inputs.projects, // Make sure projects are included in form data
-    };
-    try {
-      const { data } = await axios.put(`/api/auth/edit-employee/${id}`, formData);
-      if (data.success) {
-        toast.success(data.message);
-        navigate('/employee');
-      }
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Error updating employee");
-    }
-  };
-
-
-
+  // Fetch available project options
   const getProjects = async () => {
     try {
       const { data } = await axios.get("/api/project/get-all");
@@ -118,10 +35,104 @@ const EditEmployee = () => {
     }
   };
 
-  // useEffect to load project data
+  // Fetch employee details
+  useEffect(() => {
+    const fetchEmployee = async () => {
+      try {
+        const { data } = await axios.put(`/api/auth/edit-employee/${id}`);
+        if (data.success) {
+          setInputs({
+            employeeid: data.employee.employeeid,
+            fullname: data.employee.fullname,
+            email: data.employee.email,
+            mobile: data.employee.mobile,
+            role: data.employee.role,
+            gender: data.employee.gender,
+            status: data.employee.status,
+          });
+          
+          setInputs((prev) => ({
+            ...prev,
+            projects: data.employee.projects,
+          }));
+          
+        } else {
+          console.error(data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching employee details:", error);
+      }
+    };
+
+    fetchEmployee();
+  }, [id]);
+
+  // Update selectedProjects once projectState and inputs.projects are populated
+  useEffect(() => {
+    if (projectState.length > 0 && inputs.projects) {
+      const selected = inputs.projects.map((projectId) =>
+        projectState.find((project) => project._id === projectId)
+      );
+      setSelectedProjects(
+        selected.map((project) => ({
+          value: project._id,
+          label: project.projectname,
+        }))
+      );
+    }
+  }, [projectState, inputs.projects]);
+
+  // Handle input field changes
+  const handleChange = (e) => {
+    setInputs({
+      ...inputs,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  // Handle project selection change
+  const handleChangeProject = (selected) => {
+    setSelectedProjects(selected);
+    setInputs({
+      ...inputs,
+      projects: selected.map((project) => project.value),
+    });
+  };
+
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const formData = {
+      fullname: inputs.fullname,
+      email: inputs.email,
+      mobile: inputs.mobile,
+      employeeid: inputs.employeeid,
+      role: inputs.role,
+      gender: inputs.gender,
+      status: inputs.status,
+      projects: inputs.projects,
+    };
+    try {
+      const { data } = await axios.put(`/api/auth/edit-employee/${id}`, formData);
+      if (data.success) {
+        toast.success(data.message);
+        navigate("/employee");
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Error updating employee");
+    }
+  };
+
+  // Fetch project data
   useEffect(() => {
     getProjects();
   }, []);
+
+  // Render component
+  const options = projectState.map((project) => ({
+    value: project._id,
+    label: project.projectname,
+  }));
 
   return (
     <div className="main-container">

@@ -82,16 +82,12 @@ const AddTask = () => {
   // Fetch projects
   const getProjectsByIds = async (projectIds) => {
     try {
-      const resp = await axios.get(`/api/project/get-projects-by-ids`,{params:{ids:projectIds}});
-      // console.log(resp.data.projects);
+      const {data} = await axios.get(`/api/project/get-projects-by-ids`,{params:{ids:projectIds}});
 
-      if (resp?.data?.success) {
-        setProjectState(resp?.data?.projects);
+      if (data?.success) {
+        setProjectState(data?.projects);
       }
-      // const { data } = await axios.get("/api/project/get-all");
-      // if (data?.success) {
-      //   setProjectState(data?.project);
-      // }
+      
     } catch (error) {
       console.error(error);
     }
@@ -122,6 +118,9 @@ const AddTask = () => {
     if (data?.employee?.projects?.length > 0) {
       const projectIds =data?.employee?.projects;
       await getProjectsByIds(projectIds);
+    }else{
+      setProjectState([]);
+      setSelectedProjects([]);
     }
   };
 
