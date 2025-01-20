@@ -35,8 +35,6 @@ const EditTask = () => {
     const fetchTaskDetails = async () => {
       try {
         const { data } = await axios.put(`/api/task/edit-task/${id}`);
-        console.log(data.taskData);
-        
         if (data.taskData) {
           setInputs({
             title: data.taskData.title,
@@ -44,39 +42,59 @@ const EditTask = () => {
             enddate: dayjs(data.taskData.enddate).format('YYYY-MM-DD'),
             tag: data.taskData.tag,
             description: data.taskData.description,
-            status: data.taskData.status
-          });
-          setInputs((prev) => ({
-            ...prev,
-            assignto: data.taskData.assignto,
+            status: data.taskData.status,
             follower: data.taskData.follower,
             projectname: data.taskData.projectname,
-          }));
-          //  setSelectedEmployee(employeeState.filter((p) => data.taskData.assignto.includes(p._id)).map((p) => ({ value: p._id, label: p.fullname }))[0]);
-          // await getProjectsByIds(selectedEmployee.value);
-          // setSelectedFollowerEmployee(employeeState.filter((p) => data.taskData.follower.includes(p._id)).map((p) => ({ value: p._id, label: p.fullname }))[0]);
-          // setSelectedProjects(projectState.filter((p) => data.taskData.projectname.includes(p._id)).map((p) => ({ value: p._id, label: p.projectname }))[0]);
-          // return false
+          });
+
+          setInputs((prev)=>({
+            ...prev,
+            assignto: data.taskData.assignto,
+          }))
+     
+          
+      
         }
       } catch (error) {
         toast.error("Failed to fetch task details");
       }
     };
-  
-    fetchTaskDetails();
+    getEmployee();
+    fetchTaskDetails(); 
 
   }, [id]);
 
- useEffect(() => {
-    if (employeeState.length > 0 && inputs.assignto) {
+
+  
+  // Fetch projects
+  const getProjectsByIds = async (assignto) => {
+    try {
+      if(!assignto){
+        return false;
+      }
+      const { data } = await axios.put(`/api/auth/edit-employee/${assignto}`);
+      if (data?.employee?.projects?.length > 0) {
+        const projectIds =data?.employee?.projects;
+        const resp = await axios.get(`/api/project/get-projects-by-ids`,{params:{ids:projectIds}});
+        if (resp?.data?.success) {
+           setProjectState(resp?.data?.projects);
+           setSelectedProjects(resp?.data?.projects.filter((p) => inputs.projectname.includes(p._id)).map((p) => ({ value: p._id, label: p.projectname }))[0]);
+        }
+      }
+
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+
+ useEffect( () => {
+    if (inputs.assignto) {
            setSelectedEmployee(employeeState.filter((p) => inputs.assignto.includes(p._id)).map((p) => ({ value: p._id, label: p.fullname }))[0]);
            getProjectsByIds(inputs.assignto);
-           setSelectedProjects(projectState.filter((p) => inputs.projectname.includes(p._id)).map((p) => ({ value: p._id, label: p.projectname }))[0]);
-          setSelectedFollowerEmployee(employeeState.filter((p) => inputs.follower.includes(p._id)).map((p) => ({ value: p._id, label: p.fullname }))[0]);
-          // return false
+           setSelectedFollowerEmployee(employeeState.filter((p) => inputs.follower.includes(p._id)).map((p) => ({ value: p._id, label: p.fullname }))[0]);
     }
   }, [inputs.assignto, inputs.follower, inputs.projectname]);
-
 
   const handleChange = (e) => {
     setInputs({
@@ -126,30 +144,7 @@ const EditTask = () => {
   };
 
 
-  // Fetch projects
-  const getProjectsByIds = async (assignId) => {
-    try {
-      const { data } = await axios.put(`/api/auth/edit-employee/${assignId}`);
-      if (data?.employee?.projects?.length > 0) {
-        const projectIds =data?.employee?.projects;
-        const resp = await axios.get(`/api/project/get-projects-by-ids`,{params:{ids:projectIds}});
-        if (resp?.data?.success) {
-          setProjectState(resp?.data?.projects);
-          console.log(resp.data.projects);
-        }
-      }
-      // console.log(resp.data.projects);
 
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  
-  useEffect(() => {
-    getEmployee();
-    // getProjects();
-  }, []);
   
 
   // Employee options for select
@@ -176,6 +171,7 @@ const EditTask = () => {
 
   const handleChangeProject = (selected) => {
     setSelectedProjects(selected);
+    
   };
 
   return (

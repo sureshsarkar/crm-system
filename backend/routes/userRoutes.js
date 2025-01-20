@@ -7,7 +7,8 @@ const {
       myProfile, 
       deleteEmployee,
       getEmployee, 
-      editEmployeeController 
+      editEmployeeController,
+      employeeFindDynamicController
     } = require('../controllers/employeeController');
 const { adminAuthMiddleware } = require('../middlewares/adminAuthMiddleware');
 
@@ -30,5 +31,7 @@ router.get('/logout',adminAuthMiddleware, logoutController);
 router.delete('/delete-employee/:id',adminAuthMiddleware, deleteEmployee);
 // router.put('/edit-employee/:id', myProfile);
 router.put('/edit-employee/:id', editEmployeeController);
+
+router.post('/employee-finddynamic', employeeFindDynamicController);
 
 module.exports = router;

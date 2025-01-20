@@ -1,13 +1,16 @@
-import React,{useEffect} from 'react'
-import 
-{ BsFillArchiveFill, BsFillGrid3X3GapFill, BsPeopleFill, BsFillBellFill}
- from 'react-icons/bs'
- import 
- { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } 
- from 'recharts';
+import React,{useEffect,useState} from 'react'
+import axios from 'axios';
+import toast from "react-hot-toast";
+import { BsFillArchiveFill, BsFillGrid3X3GapFill, BsPeopleFill, BsFillBellFill}from 'react-icons/bs'
+ import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
 
 function Dashboard({getRole,roleAuth}) {
 
+  const [countData, setCountData] = useState({
+    employeeCount :0,
+    projectCount :0,
+    taskCount :0,
+  })
      useEffect(  () =>{
           getRole();
       },[roleAuth])
@@ -57,6 +60,44 @@ function Dashboard({getRole,roleAuth}) {
         },
       ];
      
+      const getData = async ()=>{
+        try {
+          const whereField = {
+            "field":"_id,email"
+          };
+          const { data } = await axios.post(`/api/auth/employee-finddynamic`,whereField);
+          const task = await axios.post(`/api/task/task-finddynamic`,whereField);
+          const project = await axios.post(`/api/project/project-finddynamic`,whereField);
+          if(data?.employee?.length>0){
+            setCountData((prev)=>({
+              ...prev,
+              employeeCount:data.employee.length,
+            }))
+          }
+
+          if(task?.data?.task?.length>0){
+            setCountData((prev)=>({
+              ...prev,
+              taskCount:task?.data.task.length,
+            }))
+          }
+
+          if(project?.data?.project?.length>0){
+            setCountData((prev)=>({
+              ...prev,
+              projectCount:project?.data.project.length,
+            }))
+          }
+          // console.log(data.employee);
+          
+        } catch (error) {
+          toast.error(error)
+        }
+      }
+
+      useEffect(()=>{
+        getData();
+      },[])
 
   return (
     <main className='main-container'>
@@ -72,7 +113,7 @@ function Dashboard({getRole,roleAuth}) {
                     <h3>Employees</h3>
                     <BsPeopleFill className='card_icon'/>
                 </div>
-                <h1>300</h1>
+                <h1>{countData.employeeCount}</h1>
                 </a>
             </div>
           ):null
@@ -83,16 +124,16 @@ function Dashboard({getRole,roleAuth}) {
                     <h3>Tasks</h3>
                     <BsFillGrid3X3GapFill className='card_icon'/>
                 </div>
-                <h1>12</h1>
+                <h1>{countData.taskCount}</h1>
                 </a>
             </div>
             <div className='card'>
             <a href="">
                 <div className='card-inner'>
-                    <h3>CUSTOMERS</h3>
+                    <h3>PROJECT</h3>
                     <BsFillArchiveFill className='card_icon'/>
                 </div>
-                <h1>33</h1>
+                <h1>{countData.projectCount}</h1>
                 </a>
             </div>
             <div className='card'>

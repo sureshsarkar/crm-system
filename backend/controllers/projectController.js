@@ -192,3 +192,29 @@ exports.deleteProject = async(req,res)=>{
         });
     }
 }
+
+
+exports.projectFindDynamicController = async (req, res)=>{
+    try {
+        const {field} = req.body;
+
+        if(!field){
+            return res.status(201).send({
+                message: 'field not found',
+                success: false
+            });
+        }
+        const project = await projectModel.find({},field)
+        return  res.status(200).send({
+            message:"Got the data",
+            success:true,
+            project:project
+        })
+    } catch (error) {
+        return res.status(500).send({
+            message: 'Server Error',
+            success: false,
+            error: error.message || error
+        });
+    }
+}

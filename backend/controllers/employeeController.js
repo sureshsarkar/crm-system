@@ -333,3 +333,29 @@ exports.deleteEmployee = async(req,res)=>{
         });
     }
 }
+
+exports.employeeFindDynamicController = async (req, res)=>{
+    try {
+        const {field} = req.body;
+
+        if(!field){
+            return res.status(201).send({
+                message: 'field not found',
+                success: false,
+                field:field
+            });
+        }
+        const employee = await employeeModel.find({},field)
+        return  res.status(200).send({
+            message:"Got the data",
+            success:true,
+            employee:employee
+        })
+    } catch (error) {
+        return res.status(500).send({
+            message: 'Server Error',
+            success: false,
+            error: error.message || error
+        });
+    }
+}

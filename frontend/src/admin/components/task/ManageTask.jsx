@@ -369,7 +369,7 @@ const ManageTask = ({ getRole, roleAuth }) => {
                 <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div className="modal-body">
-                <textarea name="comment" value={inputs.comment} onChange={handleChange} placeholder="Add a comment" />
+                <textarea name="comment" cols="60" rows="3" value={inputs.comment} onChange={handleChange} placeholder="Add a comment" />
 
               </div>
               <div className="modal-footer">

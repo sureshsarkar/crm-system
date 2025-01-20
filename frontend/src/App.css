@@ -276,3 +276,15 @@ label b{
   background-color:#3b3b3b !important;
   color: #05ac20 !important;
 }
+.bzEluS{
+  padding: 0px !important;
+}
+.dLHSn{padding: 0px 3px !important;}
+.timerButton{
+  background: #d9ffe4;
+  border-radius: 7px;
+}
+.modal-body textarea{
+  border-radius: 5px;
+  border: 1px solid #2659a4;
+}
