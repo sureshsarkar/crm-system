@@ -5,7 +5,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "frontend": "vite",
+    "start": "vite",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
